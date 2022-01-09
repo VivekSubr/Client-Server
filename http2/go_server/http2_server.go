@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"net/http"
 
@@ -9,6 +10,10 @@ import (
 )
 
 func main() {
+	ipPtr := flag.String("ip", "0.0.0.0", "ip server listening to")
+	portPtr := flag.String("port", "3000", "port server listening to")
+	flag.Parse()
+
 	h2s := &http2.Server{}
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fmt.Print("Replied\n")
@@ -16,9 +21,11 @@ func main() {
 	})
 
 	server := &http.Server{
-		Addr:    "0.0.0.0:3000",
+		Addr:    *ipPtr + ":" + *portPtr,
 		Handler: h2c.NewHandler(handler, h2s),
 	}
 
-	server.ListenAndServe()
+	fmt.Printf("serving on %v:%v\n\n", *ipPtr, *portPtr)
+	err := server.ListenAndServe()
+	fmt.Printf("%v\n", err)
 }

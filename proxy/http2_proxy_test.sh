@@ -1,3 +1,5 @@
+set -x
+
 function kill_proc() {
     killall envoy
     killall client
@@ -6,13 +8,26 @@ function kill_proc() {
 
 trap `kill_proc` SIGINT
 
+SERVER_IP=127.0.0.1
+CLIENT_IP=127.0.0.1
+
+if [[ "$1" == "reverse" ]]; then
+    SERVER_PORT=10000
+    CLIENT_PORT=1447
+    ENVOY_YAML=envoy-as-reverse-proxy.yaml
+else 
+    SERVER_PORT=1447
+    CLIENT_PORT=10000
+    ENVOY_YAML=envoy-as-proxy.yaml
+fi
+
 #Run envoy proxy
 make clean build
-envoy -c envoy/envoy-as-proxy.yaml &> envoy.log & 
+envoy -c envoy/$ENVOY_YAML &> envoy.log & 
 
 #Run http2 server and client, both should refer to envoy proxy
-./go_server/http2-example -ip=127.0.0.1 -port=1447 &> server.log &
-./go_client/client -ip=127.0.0.1 -port=10000 &> client.log &
+./go_server/http2-example -ip=$SERVER_IP -port=$SERVER_PORT &> server.log &
+./go_client/client -ip=$CLIENT_IP -port=$CLIENT_PORT &> client.log &
 
 #verify communication
 tail -f server.log | while read temp
