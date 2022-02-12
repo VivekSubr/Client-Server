@@ -1,0 +1,9 @@
+[submodule "module/opentelemetry-cpp"]
+	path = module/opentelemetry-cpp
+	url = https://github.com/open-telemetry/opentelemetry-cpp.git
+[submodule "module/benchmark"]
+	path = module/benchmark
+	url = https://github.com/google/benchmark.git
+[submodule "module/curl"]
+	path = module/curl
+	url = https://github.com/curl/curl.git

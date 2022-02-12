@@ -10,3 +10,8 @@ Contains sample implementation of socket server-client, server is in golang and 
 To use the client, libcurl with nghttp2 backend needs to be compiled and env variables set accordingly.
 
 ## grpc
+
+
+
+## opentelemetry 
+Example showcasing Jaeger usage using opentelemetry cpp SDK?

@@ -1,10 +1,8 @@
 set -x
 
-#pull the jaeger images
-docker pull jaegertracing/opentelemetry-all-in-one
+docker pull jaegertracing/all-in-one:1.31
 
-#run, as per https://www.jaegertracing.io/docs/1.29/getting-started/
-docker run -d --name jaeger-opentelemetry \
+docker run -d --name jaeger \
   -e COLLECTOR_ZIPKIN_HOST_PORT=:9411 \
   -p 5775:5775/udp \
   -p 6831:6831/udp \
@@ -15,7 +13,4 @@ docker run -d --name jaeger-opentelemetry \
   -p 14268:14268 \
   -p 14269:14269 \
   -p 9411:9411 \
-  jaegertracing/opentelemetry-all-in-one:latest
-
-
-
+  jaegertracing/all-in-one:1.31

@@ -1,16 +1,37 @@
 #pragma once
-#include "opentelemetry/exporters/jaeger/jaeger_exporter.h"
-#include "opentelemetry/sdk/trace/simple_processor.h"
-#include "opentelemetry/sdk/trace/tracer_provider.h"
-#include "opentelemetry/trace/provider.h"
+#include <string>
+#include <map>
+#include "opentelemetry/sdk/trace/tracer.h"
 
-namespace trace     = opentelemetry::trace;
-namespace nostd     = opentelemetry::nostd;
-namespace trace_sdk = opentelemetry::sdk::trace;
-namespace jaeger    = opentelemetry::exporter::jaeger;
+namespace trace = opentelemetry::trace;
+namespace nostd = opentelemetry::nostd;
 
-struct Tracer 
+enum TraceType {
+   UDP = 0,
+   HTTP,
+   Memory
+};
+
+class Tracer 
 {
-    Tracer();
-    ~Tracer();
+ public:
+  Tracer() = delete;
+  Tracer(const std::string& app, const std::string& ver);
+  ~Tracer() = default;
+
+  nostd::shared_ptr<trace_api::Span> StartSpan(const std::string& str);
+  void                               SetTraceType(TraceType t);
+  std::string                        GetTraceTypeStr(TraceType t) { return sTraceType.at(t); }   
+
+ private:
+  nostd::shared_ptr<trace::Tracer> m_UDP_tracer;
+  nostd::shared_ptr<trace::Tracer> m_HTTP_tracer;
+  nostd::shared_ptr<trace::Tracer> m_mem_tracer;
+  
+  nostd::shared_ptr<trace::Tracer> m_tracer;
+  std::unordered_map<TraceType, std::string> sTraceType = {
+    {UDP, "udp"}, {HTTP, "http"}, {Memory, "memory"}
+  };
+
+  void initTracer(TraceType t) { } 
 };
