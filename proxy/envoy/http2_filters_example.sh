@@ -1,2 +1,0 @@
-#demonstrates envoy http filters
-

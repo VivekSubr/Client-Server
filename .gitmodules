@@ -7,3 +7,9 @@
 [submodule "module/curl"]
 	path = module/curl
 	url = https://github.com/curl/curl.git
+[submodule "module/proxy-wasm-cpp-sdk"]
+	path = module/proxy-wasm-cpp-sdk
+	url = https://github.com/proxy-wasm/proxy-wasm-cpp-sdk.git
+[submodule "module/envoy"]
+	path = module/envoy
+	url = https://github.com/envoyproxy/envoy.git

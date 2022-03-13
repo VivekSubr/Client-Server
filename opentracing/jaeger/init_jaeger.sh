@@ -1,4 +1,5 @@
 set -x
+#https://www.jaegertracing.io/docs/1.31/getting-started/
 
 docker pull jaegertracing/all-in-one:1.31
 

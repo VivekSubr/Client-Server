@@ -1,1 +1,0 @@
-#configure same as 'envoy-as-proxy.yaml' using xDS APIs and test

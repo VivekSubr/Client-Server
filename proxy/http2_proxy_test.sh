@@ -15,6 +15,10 @@ if [[ "$1" == "reverse" ]]; then
     SERVER_PORT=10000
     CLIENT_PORT=1447
     ENVOY_YAML=envoy-as-reverse-proxy.yaml
+elif [[ "$1" == "L7" ]]; then
+    SERVER_PORT=1447
+    CLIENT_PORT=10000
+    ENVOY_YAML=envoy-L7.yaml
 else 
     SERVER_PORT=1447
     CLIENT_PORT=10000
@@ -23,7 +27,7 @@ fi
 
 #Run envoy proxy
 make clean build
-envoy -c envoy/$ENVOY_YAML &> envoy.log & 
+envoy --log-level debug -c envoy/$ENVOY_YAML --log-path $PWD/envoy.log &
 
 #Run http2 server and client, both should refer to envoy proxy
 ./go_server/http2-example -ip=$SERVER_IP -port=$SERVER_PORT &> server.log &

@@ -14,7 +14,7 @@ func main() {
 	portPtr := flag.String("port", "3000", "port server listening to")
 	flag.Parse()
 
-	url := "http://" + *ipPtr + ":" + *portPtr
+	url := "http://" + *ipPtr + ":" + *portPtr + "/example"
 	postBody, _ := json.Marshal(map[string]string{
 		"name":  "Subru",
 		"email": "Subru@example.com",
