@@ -7,4 +7,4 @@ export CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH:$THRIFT_PATH:$THRIFT_ADDL:$OPENTELEM
                       
 rm -fr build
 mkdir -p build && cd build
-cmake ..
+cmake .. 

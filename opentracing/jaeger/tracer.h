@@ -6,6 +6,7 @@
 #include "opentelemetry/sdk/common/global_log_handler.h"
 #include "opentelemetry/ext/http/client/http_client.h"
 #include "opentelemetry/trace/propagation/http_trace_context.h"
+#include "logger/logger.h"
 
 namespace trace      = opentelemetry::trace;
 namespace nostd      = opentelemetry::nostd;
@@ -20,6 +21,8 @@ enum TraceType {
 
 class CustomLogHandler : public opentelemetry::sdk::common::internal_log::LogHandler
 {
+  Logger m_logger = Logger("jaeger.log");
+
 public:
     void Handle(opentelemetry::sdk::common::internal_log::LogLevel level,
                 const char *file,
@@ -28,8 +31,7 @@ public:
                 const opentelemetry::sdk::common::AttributeMap &attributes) noexcept override
 
     {
-      std::cout<<"FILE: "<<file<<" LINE: "<<line<<"\n";
-      std::cout<<msg<<"\n";
+      m_logger.Log(file, line, msg);
     }
 };
 
@@ -80,9 +82,9 @@ class Tracer
   nostd::shared_ptr<trace::Span> StartSpan(const std::string& str);
   void                           SetTraceType(TraceType t);
   std::string                    GetTraceTypeStr(TraceType t) { return sTraceType.at(t); } 
-  void InjectSpan(HttpTextMapCarrier<http::client::Headers> carrier);
+  void                           InjectSpan(HttpTextMapCarrier<http::client::Headers> carrier);
   nostd::shared_ptr<trace::Span> ExtractSpan(HttpTextMapCarrier<http::client::Headers> carrier);
-
+  
  private:
   nostd::shared_ptr<trace::Tracer>          m_tracer;
   std::shared_ptr<trace_sdk::TracerContext> m_tracer_ctx;

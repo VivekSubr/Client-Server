@@ -1,18 +1,20 @@
 cmake_minimum_required(VERSION 3.0.0)
 project(TracerExample VERSION 1.0.0)
 
-#set(CURL_LIBRARY "-lcurl") 
 find_package(CURL REQUIRED) 
 find_package(Thrift REQUIRED) 
 find_package(opentelemetry-cpp CONFIG REQUIRED)
+find_package(Boost 1.71 COMPONENTS log REQUIRED )
+include_directories( ${Boost_INCLUDE_DIRS} )
 
 include_directories(${CURL_INCLUDE_DIR})
 
-add_library(Tracer STATIC tracer.cc http.cc)
+add_library(Tracer STATIC tracer.cc http.cc logger/logger.cc)
 add_executable(example example.cc)
 
 target_include_directories(Tracer PRIVATE ${OPENTELEMETRY_CPP_INCLUDE_DIRS})
 target_link_libraries(Tracer PRIVATE ${OPENTELEMETRY_CPP_LIBRARIES})
+target_link_libraries(Tracer PRIVATE ${Boost_LIBRARIES})
 target_link_libraries(example PRIVATE Tracer ${CURL_LIBRARIES})
 target_include_directories(example PRIVATE ${OPENTELEMETRY_CPP_INCLUDE_DIRS})
 
@@ -26,8 +28,10 @@ add_executable(TracerTest tracer_test.cc)
 
 # Link test executable against gtest & gtest_main
 target_link_libraries(TracerTest ${GTEST_LIBRARY} ${GTEST_MAIN_LIBRARY})
+target_link_libraries(TracerTest ${Boost_LIBRARIES})
 
 target_include_directories(TracerTest PRIVATE ${OPENTELEMETRY_CPP_INCLUDE_DIRS})
+target_include_directories(TracerTest PRIVATE ${Boost_INCLUDE_DIRS})
 
 add_test(
     NAME TracerTest
@@ -35,10 +39,11 @@ add_test(
 )
 
 target_link_libraries(
-    TracerTest 
+    TracerTest
     gtest_main
     gtest
     gmock
+    boost_log
     pthread
     Tracer
 )
