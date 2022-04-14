@@ -7,11 +7,13 @@
 #include "opentelemetry/ext/http/client/http_client.h"
 #include "opentelemetry/trace/propagation/http_trace_context.h"
 #include "logger/logger.h"
+#include "opentelemetry/exporters/memory/in_memory_span_exporter.h"
 
 namespace trace      = opentelemetry::trace;
 namespace nostd      = opentelemetry::nostd;
 namespace trace_sdk  = opentelemetry::sdk::trace;
 namespace http       = opentelemetry::ext::http;
+namespace memory     = opentelemetry::exporter::memory;
 
 enum TraceType {
    UDP = 0,
@@ -75,15 +77,29 @@ public:
 class Tracer 
 {
  public:
-  Tracer() = delete;
+  Tracer() = default;
   Tracer(const std::string& app, const std::string& ver, TraceType t);
   ~Tracer();
 
-  nostd::shared_ptr<trace::Span> StartSpan(const std::string& str);
+  nostd::shared_ptr<trace::Span> StartSpan(const std::string& str) { 
+    return m_tracer->StartSpan(str); 
+  }
+  
+  void SetActiveSpan(nostd::shared_ptr<trace::Span> span) { 
+    m_tracer->WithActiveSpan(span); 
+  }
+
+  nostd::shared_ptr<trace::Span> GetActiveSpan() {
+    m_tracer->GetCurrentSpan();
+  }
+  
   void                           SetTraceType(TraceType t);
   std::string                    GetTraceTypeStr(TraceType t) { return sTraceType.at(t); } 
   void                           InjectSpan(HttpTextMapCarrier<http::client::Headers> carrier);
   nostd::shared_ptr<trace::Span> ExtractSpan(HttpTextMapCarrier<http::client::Headers> carrier);
+  std::shared_ptr<memory::InMemorySpanData> InitInMemoryTracer(const std::string& app, 
+                                                              const std::string& ver,
+                                                              std::unique_ptr<memory::InMemorySpanExporter> exporter);
   
  private:
   nostd::shared_ptr<trace::Tracer>          m_tracer;
@@ -94,4 +110,5 @@ class Tracer
   };
 
   void initTracer(const std::string& app, const std::string& ver, TraceType t);
+  opentelemetry::sdk::resource::Resource createResources();
 };

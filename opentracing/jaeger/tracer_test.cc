@@ -7,9 +7,13 @@ using namespace opentelemetry;
 
 TEST(TestTracer, Span)
 {
-    auto tracer = std::make_unique<Tracer>("TestTracer", "1.0.0", Memory);
-    auto span   = tracer->StartSpan("Test Span");
+    Tracer tracer;
+    std::unique_ptr<memory::InMemorySpanExporter> exporter(new memory::InMemorySpanExporter());
+    auto span_data = tracer.InitInMemoryTracer("TestTracer", "1.0.0", std::move(exporter));
+    auto span      = tracer.StartSpan("Test Span");
 
+    ASSERT_EQ(0, span_data->GetSpans().size());
+    
     span->AddEvent("Test Event");
     span->End();
 }

@@ -6,7 +6,7 @@ Opentelemetry CPP SDK needs to be built first,
   cmake .. -DBUILD_SHARED_LIBS=ON -DWITH_JAEGER=ON
   cmake --build . --target all
   ctest
-  cmake --install . --config Debug --prefix ../.
+  cmake --install . --config Release --prefix ../.
 
 Do these steps:
 * ./init_jaeger.sh to start up jaeger
