@@ -30,5 +30,6 @@ int main()
         std::cout << "resolved ip: " << host << "\n";
     } 
 
+    freeaddrinfo(servinfo);
     return 0;
 }
