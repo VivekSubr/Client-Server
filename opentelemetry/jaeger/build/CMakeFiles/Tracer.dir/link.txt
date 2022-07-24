@@ -1,0 +1,2 @@
+/usr/bin/ar qc libTracer.a  CMakeFiles/Tracer.dir/tracer.cc.o CMakeFiles/Tracer.dir/http.cc.o CMakeFiles/Tracer.dir/logger/logger.cc.o
+/usr/bin/ranlib libTracer.a

@@ -1,0 +1,6 @@
+/home/vivek/Client-Server/opentracing/jaeger/build/CMakeFiles/rebuild_cache.dir
+/home/vivek/Client-Server/opentracing/jaeger/build/CMakeFiles/edit_cache.dir
+/home/vivek/Client-Server/opentracing/jaeger/build/CMakeFiles/test.dir
+/home/vivek/Client-Server/opentracing/jaeger/build/CMakeFiles/example.dir
+/home/vivek/Client-Server/opentracing/jaeger/build/CMakeFiles/TracerTest.dir
+/home/vivek/Client-Server/opentracing/jaeger/build/CMakeFiles/Tracer.dir

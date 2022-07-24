@@ -9,8 +9,13 @@ static_resources:
           typed_config:
             "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.DownstreamTlsContext 
             common_tls_context:
+              tls_certificates:
+                - certificate_chain:
+                    filename: /ca/envoy-tls.cert
+                  private_key:
+                    filename: /ca/envoy-tls.key
               tls_params:
-                tls_minimum_protocol_version: TLSv1_3
+                tls_maximum_protocol_version: TLSv1_3
 
       filter_chains:
         - filters:
@@ -28,8 +33,11 @@ static_resources:
         typed_config:
           "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
           common_tls_context:
+            validation_context:
+                trust_chain_verification: ACCEPT_UNTRUSTED # since we're using self signed
             tls_params:
               tls_minimum_protocol_version: TLSv1_3
+              tls_maximum_protocol_version: TLSv1_3
               
       load_assignment:
         cluster_name: cluster_0

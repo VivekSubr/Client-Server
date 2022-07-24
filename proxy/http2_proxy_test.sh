@@ -10,18 +10,18 @@ trap `kill_proc` SIGINT
 
 SERVER_IP=127.0.0.1
 CLIENT_IP=127.0.0.1
+SERVER_PORT=1447
+CLIENT_PORT=10000
 
 if [[ "$1" == "reverse" ]]; then
     SERVER_PORT=10000
     CLIENT_PORT=1447
     ENVOY_YAML=envoy-as-reverse-proxy.yaml
 elif [[ "$1" == "L7" ]]; then
-    SERVER_PORT=1447
-    CLIENT_PORT=10000
     ENVOY_YAML=envoy-L7.yaml
+elif [[ "$1" == "tls" ]]; then
+    ENVOY_YAML=envoy-tls.yaml
 else 
-    SERVER_PORT=1447
-    CLIENT_PORT=10000
     ENVOY_YAML=envoy-as-proxy.yaml
 fi
 
