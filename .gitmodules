@@ -13,3 +13,6 @@
 [submodule "module/envoy"]
 	path = module/envoy
 	url = https://github.com/envoyproxy/envoy.git
+[submodule "nghttp2"]
+	path = module/nghttp2
+	url = git@github.com:nghttp2/nghttp2.git
