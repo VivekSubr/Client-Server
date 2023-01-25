@@ -442,7 +442,6 @@ static void initialize_nghttp2_session(http2_session_data *session_data) {
 
 /***************************************/
 
-
 /********* Server api ******************/
 static void start_listen(struct event_base *evbase, const char *service, app_context *app_ctx) 
 {

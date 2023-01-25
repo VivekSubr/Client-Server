@@ -31,7 +31,6 @@ public:
                 int line,
                 const char *msg,
                 const opentelemetry::sdk::common::AttributeMap &attributes) noexcept override
-
     {
       m_logger.Log(file, line, msg);
     }
@@ -71,6 +70,8 @@ public:
     headers_.insert(std::pair<std::string, std::string>(std::string(key), std::string(value)));
   }
 
+  T Headers() { return headers_; }
+
   T headers_;
 };
 
@@ -81,23 +82,45 @@ class Tracer
   Tracer(const std::string& app, const std::string& ver, TraceType t);
   ~Tracer();
 
-  nostd::shared_ptr<trace::Span> StartSpan(const std::string& str) { 
-    return m_tracer->StartSpan(str); 
-  }
-  
-  void SetActiveSpan(nostd::shared_ptr<trace::Span> span) { 
-    m_tracer->WithActiveSpan(span); 
+  void StartSpan(const std::string& spanName) { 
+    if(m_currentSpan) m_parentSpans.push_back(m_currentSpan);
+    m_currentSpan  = m_tracer->StartSpan(spanName);
+    m_activeScopes.push_back(m_tracer->WithActiveSpan(m_currentSpan)); 
   }
 
-  nostd::shared_ptr<trace::Span> GetActiveSpan() {
-    m_tracer->GetCurrentSpan();
+  nostd::shared_ptr<trace::Span> GetCurrentSpan() {
+    return m_currentSpan;
+  }
+
+  trace::SpanId SaveSpan() {
+    if(!m_currentSpan) return trace::SpanId();
+    
+    auto id = m_currentSpan->GetContext().span_id();
+    m_spanMap.insert({id, m_currentSpan});
+    m_currentSpan = nullptr;
+    return id;
+  }
+
+  bool ResumeSpan(const trace::SpanId& id) {
+    if(m_spanMap.find(id) == m_spanMap.end()) return false;
+    
+    m_currentSpan = m_spanMap.at(id);
+    return true;
+  }
+
+  trace::SpanId GetSpanId() {
+    return GetCurrentSpan()->GetContext().span_id();
+  }
+
+  const std::map<trace::SpanId, nostd::shared_ptr<trace::Span>>& GetSpanMap() {
+    return m_spanMap;
   }
   
-  void                           SetTraceType(TraceType t);
-  std::string                    GetTraceTypeStr(TraceType t) { return sTraceType.at(t); } 
-  void                           InjectSpan(HttpTextMapCarrier<http::client::Headers> carrier);
-  nostd::shared_ptr<trace::Span> ExtractSpan(HttpTextMapCarrier<http::client::Headers> carrier);
-  std::shared_ptr<memory::InMemorySpanData> InitInMemoryTracer(const std::string& app, 
+  void                                       SetTraceType(TraceType t);
+  std::string                                GetTraceTypeStr(TraceType t) { return sTraceType.at(t); } 
+  HttpTextMapCarrier<http::client::Headers>  InjectSpan();
+  nostd::shared_ptr<trace::Span>             ExtractSpan(HttpTextMapCarrier<http::client::Headers>& carrier);
+  std::shared_ptr<memory::InMemorySpanData>  InitInMemoryTracer(const std::string& app, 
                                                               const std::string& ver,
                                                               std::unique_ptr<memory::InMemorySpanExporter> exporter);
   
@@ -109,6 +132,13 @@ class Tracer
     {UDP, "udp"}, {HTTP, "http"}, {Memory, "memory"}
   };
 
+  nostd::shared_ptr<trace::Span>                          m_currentSpan{nullptr};
+  std::deque<nostd::shared_ptr<trace::Span> >             m_parentSpans;
+  std::map<trace::SpanId, nostd::shared_ptr<trace::Span>> m_spanMap;
+  std::deque<trace::Scope>                                m_activeScopes;
+
   void initTracer(const std::string& app, const std::string& ver, TraceType t);
   opentelemetry::sdk::resource::Resource createResources();
+
+  //static nostd::shared_ptr<trace::Span> EMPTY_SPAN;
 };

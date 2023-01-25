@@ -1,26 +1,36 @@
 package main
 
 import (
+    "fmt"
     "log"
+    "flag"
     "crypto/tls"
     "net"
     "bufio"
 )
 
-var CRT = "publickey.cer"
-var KEY = "private.pem"
-
 func main() {
+    ipPtr := flag.String("ip", "0.0.0.0", "ip server listening to")
+    portPtr := flag.String("port", "3000", "port server listening to")
+    crtPtr := flag.String("crt", "publickey.cer", "X.509 certificate")
+    keyPtr := flag.String("key", "private.pem", "private key")
+    flag.Parse()
+
+    fmt.Printf("listening on %s\n", *ipPtr + ":" + *portPtr)
     log.SetFlags(log.Lshortfile)
 
-    cer, err := tls.LoadX509KeyPair(CRT, KEY)
+    cer, err := tls.LoadX509KeyPair(*crtPtr, *keyPtr)
     if err != nil {
         log.Println(err)
         return
     }
 
-    config := &tls.Config{Certificates: []tls.Certificate{cer}}
-    ln, err := tls.Listen("tcp", ":9443", config) 
+    config := &tls.Config{
+        Certificates: []tls.Certificate{cer},
+        MinVersion:    tls.VersionTLS13,
+    }
+    
+    ln, err := tls.Listen("tcp",  *ipPtr + ":" + *portPtr, config) 
     if err != nil {
         log.Println(err)
         return
@@ -54,5 +64,7 @@ func handleConnection(conn net.Conn) {
             log.Println(n, err)
             return
         }
+
+        fmt.Print("Replied\n")
     }
 }

@@ -10,5 +10,5 @@ make
 make install
 
 * Written refering to this: https://github.com/nghttp2/nghttp2/blob/master/examples/libevent-server.c
-Modifications are to - 1. Remove openssl requirement
-                       2. 
+
+* Test conformance to spec with https://github.com/summerwind/h2spec

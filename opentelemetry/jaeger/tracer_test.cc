@@ -1,102 +1,164 @@
 #include "trace_test.h"
+#include "sampler.h"
 #include "opentelemetry/context/propagation/global_propagator.h"
 #include "logger/logger.h"
 #include <fstream>
+
+#include "opentelemetry/exporters/jaeger/jaeger_exporter.h"
+#include "opentelemetry/sdk/trace/simple_processor.h"
+#include "opentelemetry/sdk/trace/tracer_provider.h"
+#include "opentelemetry/trace/provider.h"
+#include "opentelemetry/trace/context.h"
+#include "opentelemetry/trace/propagation/jaeger.h"
+#include "opentelemetry/context/propagation/global_propagator.h"
+#include <opentelemetry/sdk/trace/samplers/trace_id_ratio.h>
+
 using namespace std;
 using namespace opentelemetry;
 
-TEST(TestTracer, Span)
+namespace trace      = opentelemetry::trace;
+namespace nostd      = opentelemetry::nostd;
+namespace trace_sdk  = opentelemetry::sdk::trace;
+namespace http       = opentelemetry::ext::http;
+namespace memory     = opentelemetry::exporter::memory;
+
+TEST_F(TestTracer, Span)
+{
+    std::unique_ptr<memory::InMemorySpanExporter> exporter(new memory::InMemorySpanExporter());
+
+    auto resource_attributes = opentelemetry::sdk::resource::ResourceAttributes
+    {
+        {"service.name", "Test"},
+        {"service.instance.id", "Test-12"}
+    };
+    auto resource = opentelemetry::sdk::resource::Resource::Create(resource_attributes);
+    
+    std::shared_ptr<memory::InMemorySpanData> span_data = exporter->GetData();
+    auto sampler = std::unique_ptr<CustomSampler>(new CustomSampler(0.1));
+    auto processor = std::unique_ptr<trace_sdk::SpanProcessor>(new trace_sdk::SimpleSpanProcessor(std::move(exporter)));
+    std::vector<std::unique_ptr<trace_sdk::SpanProcessor>> v; v.push_back(std::move(processor));
+    auto m_tracer_ctx = std::make_shared<trace_sdk::TracerContext>(
+                              std::move(v), 
+                              resource, 
+                              std::move(sampler));
+        
+    auto m_trace_provider = std::shared_ptr<trace::TracerProvider>(new trace_sdk::TracerProvider(m_tracer_ctx));
+    auto m_tracer = m_trace_provider->GetTracer("TestTracer", "1.0.0");
+
+    trace::StartSpanOptions options; 
+    for(int i=0; i<10; i++)
+    {
+        std::ostringstream s;
+        s << "span" << i;
+        auto span = m_tracer->StartSpan(s.str(), {}, {}, options);
+        span->SetAttribute("ForceSampling", true);
+        span->End();
+    }
+
+    ASSERT_EQ(span_data->GetSpans().size(), 10);
+}
+
+/*
+TEST_F(TestTracer, Span)
 {
     Tracer tracer;
     std::unique_ptr<memory::InMemorySpanExporter> exporter(new memory::InMemorySpanExporter());
     auto span_data = tracer.InitInMemoryTracer("TestTracer", "1.0.0", std::move(exporter));
-    auto span      = tracer.StartSpan("Test Span");
+    tracer.StartSpan("Test Span");
+    auto span = tracer.GetCurrentSpan();
 
-    ASSERT_EQ(0, span_data->GetSpans().size());
-    
+    std::cout<<"spanId "<<spanId2Str(span->GetContext().span_id())<<"\n";
+ 
+    //Started a span before end of first... hence this is child of first
+    tracer.StartSpan("Test Child Span");
+    auto child_span = tracer.GetCurrentSpan(); 
+    std::cout<<"child spanId "<<spanId2Str(child_span->GetContext().span_id())<<"\n";
+
+    ASSERT_EQ(0, span_data->GetSpans().size()); //nothing ended yet
+
     span->AddEvent("Test Event");
+
+    child_span->End();
+    auto exported_spans = span_data->GetSpans();
+    ASSERT_EQ(1, exported_spans.size()); //after end span gets exported
+    ASSERT_EQ("Test Child Span", exported_spans.at(0)->GetName());
+    EXPECT_TRUE(exported_spans.at(0)->GetTraceId().IsValid());
+    EXPECT_TRUE(exported_spans.at(0)->GetSpanId().IsValid());
+    EXPECT_TRUE(exported_spans.at(0)->GetParentSpanId().IsValid());
+
     span->End();
-}
+    auto exported_spans2 = span_data->GetSpans();
+    ASSERT_EQ(1, exported_spans2.size());
+    ASSERT_EQ("Test Span", exported_spans2.at(0)->GetName());
+    EXPECT_TRUE(exported_spans2.at(0)->GetTraceId().IsValid());
+    EXPECT_TRUE(exported_spans2.at(0)->GetSpanId().IsValid());
+    EXPECT_FALSE(exported_spans2.at(0)->GetParentSpanId().IsValid());
 
-TEST(TestTracer, SpanPropogation)
+    // Verify trace and parent span id propagation
+    EXPECT_EQ(exported_spans.at(0)->GetTraceId(), exported_spans2.at(0)->GetTraceId());
+    EXPECT_EQ(exported_spans.at(0)->GetParentSpanId(), exported_spans2.at(0)->GetSpanId());
+} 
+
+TEST_F(TestTracer, SaveResumeSpan)
 {
-    struct TestTrace
+    Tracer tracer;
+    std::unique_ptr<memory::InMemorySpanExporter> exporter(new memory::InMemorySpanExporter());
+    auto span_data = tracer.InitInMemoryTracer("TestTracer", "1.0.0", std::move(exporter));
+    tracer.StartSpan("Test Span");
+    auto span      = tracer.GetCurrentSpan();
+
+    span->AddEvent("Test Event");
+    ASSERT_EQ(0, span_data->GetSpans().size()); 
+    ASSERT_EQ(0, tracer.GetSpanMap().size());
+    ASSERT_EQ(span->GetContext().span_id(),tracer.GetSpanId());
+
+    ASSERT_EQ(tracer.GetSpanMap().size(), 0);
+    auto id = tracer.SaveSpan();
+    std::cout<<"id 1 "<<spanId2Str(id)<<"\n";
+    ASSERT_EQ(tracer.GetSpanMap().size(), 1);
+    ASSERT_TRUE(tracer.GetSpanMap().find(id) != tracer.GetSpanMap().end());
+
+    ASSERT_EQ(1, tracer.GetSpanMap().size());
+    ASSERT_EQ(0, span_data->GetSpans().size());
+
+    tracer.StartSpan("Test Span");
+    auto span2  = tracer.GetCurrentSpan();
+    ASSERT_NE(id, tracer.GetSpanId());
+
+    auto id2 = tracer.SaveSpan();
+    //ASSERT_EQ(tracer.GetSpanMap().size(), 2);
+    
+    for(auto ele : tracer.GetSpanMap())
     {
-        std::string trace_state;
-        std::string expected_trace_id;
-        std::string expected_span_id;
-        bool sampled;
-    };
+        std::cout<<spanId2Str(ele.first)<<"\n";
+    }
 
-    std::vector<TestTrace> traces = {
-      {
-          "4bf92f3577b34da6a3ce929d0e0e4736:0102030405060708:0:00",
-          "4bf92f3577b34da6a3ce929d0e0e4736",
-          "0102030405060708",
-          false,
-      },
-      {
-          "4bf92f3577b34da6a3ce929d0e0e4736:0102030405060708:0:ff",
-          "4bf92f3577b34da6a3ce929d0e0e4736",
-          "0102030405060708",
-          true,
-      },
-      {
-          "4bf92f3577b34da6a3ce929d0e0e4736:0102030405060708:0:f",
-          "4bf92f3577b34da6a3ce929d0e0e4736",
-          "0102030405060708",
-          true,
-      },
-      {
-          "a3ce929d0e0e4736:0102030405060708:0:00",
-          "0000000000000000a3ce929d0e0e4736",
-          "0102030405060708",
-          false,
-      },
-      {
-          "A3CE929D0E0E4736:ABCDEFABCDEF1234:0:01",
-          "0000000000000000a3ce929d0e0e4736",
-          "abcdefabcdef1234",
-          true,
-      },
-      {
-          "ff:ABCDEFABCDEF1234:0:0",
-          "000000000000000000000000000000ff",
-          "abcdefabcdef1234",
-          false,
-      },
-      {
-          "4bf92f3577b34da6a3ce929d0e0e4736:0102030405060708:0102030405060708:00",
-          "4bf92f3577b34da6a3ce929d0e0e4736",
-          "0102030405060708",
-          false,
-      },
+    ASSERT_TRUE(tracer.ResumeSpan(id));
+//    ASSERT_EQ(id, tracer.GetSpanId());
+} 
 
-  };
-
-  auto propagator  = context::propagation::GlobalTextMapPropagator::GetGlobalPropagator();
-  for (TestTrace &test_trace : traces)
-  {
-    HttpTextMapCarrier<http::client::Headers> carrier;
-    carrier.headers_      = {{"uber-trace-id", test_trace.trace_state}};
-    context::Context ctx1 = context::Context{};
-    context::Context ctx2 = propagator->Extract(carrier, ctx1);
-
-    auto span = trace::GetSpan(ctx2)->GetContext();
-    EXPECT_TRUE(span.IsValid());
-
-    EXPECT_EQ(Hex(span.trace_id()), test_trace.expected_trace_id);
-    EXPECT_EQ(Hex(span.span_id()), test_trace.expected_span_id);
-    EXPECT_EQ(span.IsSampled(), test_trace.sampled);
-    EXPECT_EQ(span.IsRemote(), true);
-  }
-}
-
-TEST(TestTracer, Logger)
+TEST_F(TestTracer, InjectExtract)
 {
-    Logger lg("jaeger.log");
-    lg.Log("test.c", 12, "test message");
+    Tracer tracer;
+    std::unique_ptr<memory::InMemorySpanExporter> exporter(new memory::InMemorySpanExporter());
+    auto span_data = tracer.InitInMemoryTracer("TestTracer", "1.0.0", std::move(exporter));
+    tracer.StartSpan("Test Span");
+    auto span      = tracer.GetCurrentSpan();
+ 
+    auto carrier = tracer.InjectSpan();
+    auto carrier_headers = carrier.Headers();
 
-    std::ifstream iFile("jaeger.log");
-    ASSERT_TRUE(iFile.good());
+    std::cout<<"Size "<<carrier_headers.size()<<"\n";
+    for(auto it : carrier_headers)
+    {
+        std::cout<<it.first<<":"<<it.second<<"\n";
+    }
+
+    auto remote_span = tracer.ExtractSpan(carrier);
+    ASSERT_EQ(remote_span->GetContext().span_id(), span->GetContext().span_id());
 }
+
+TEST_F(TestTracer, Sampling)
+{
+
+} */

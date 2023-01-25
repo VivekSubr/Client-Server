@@ -25,17 +25,23 @@ include_directories(${GTEST_INCLUDE_DIR})
 
 # Add test cpp file
 add_executable(TracerTest tracer_test.cc)
+add_executable(LoggerTest logger/logger_test.cc)
 
 # Link test executable against gtest & gtest_main
-target_link_libraries(TracerTest ${GTEST_LIBRARY} ${GTEST_MAIN_LIBRARY})
-target_link_libraries(TracerTest ${Boost_LIBRARIES})
+target_link_libraries(TracerTest ${GTEST_LIBRARY} ${GTEST_MAIN_LIBRARY} ${Boost_LIBRARIES})
+target_link_libraries(LoggerTest  ${GTEST_LIBRARY} ${GTEST_MAIN_LIBRARY} ${Boost_LIBRARIES})
 
-target_include_directories(TracerTest PRIVATE ${OPENTELEMETRY_CPP_INCLUDE_DIRS})
-target_include_directories(TracerTest PRIVATE ${Boost_INCLUDE_DIRS})
+target_include_directories(TracerTest PRIVATE ${OPENTELEMETRY_CPP_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
+target_include_directories(LoggerTest PRIVATE ${OPENTELEMETRY_CPP_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 
 add_test(
     NAME TracerTest
     COMMAND TracerTest
+)
+
+add_test(
+    NAME LoggerTest
+    COMMAND LoggerTest
 )
 
 target_link_libraries(
@@ -46,6 +52,15 @@ target_link_libraries(
     boost_log
     pthread
     Tracer
+)
+
+target_link_libraries(
+    LoggerTest
+    gtest_main
+    gtest
+    gmock
+    boost_log
+    pthread
 )
 
 message(STATUS "CURL_INCLUDE_DIR=${CURL_INCLUDE_DIR}")

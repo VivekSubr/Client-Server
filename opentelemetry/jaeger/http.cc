@@ -19,7 +19,9 @@ httpClient::~httpClient()
 bool httpClient::post(const std::string& ip, const std::string& api, const std::string& json, TraceType t)
 {
     auto m_tracer = std::make_unique<Tracer>("httpClient", "1.0.0", t);
-    auto span = m_tracer->StartSpan("http post " + m_tracer->GetTraceTypeStr(t));
+    m_tracer->StartSpan("http post " + m_tracer->GetTraceTypeStr(t));
+    auto span = m_tracer->GetCurrentSpan();
+
     auto hnd = curl_easy_init();
     if(hnd == NULL) return false;
 

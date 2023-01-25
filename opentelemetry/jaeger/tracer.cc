@@ -9,22 +9,29 @@
 #include "opentelemetry/trace/propagation/jaeger.h"
 #include "opentelemetry/context/propagation/global_propagator.h"
 
+//https://opentelemetry.io/docs/instrumentation/cpp/manual/
+
 namespace jaeger      = opentelemetry::exporter::jaeger;
-namespace log         = opentelemetry::sdk::common::internal_log;
+namespace ot_log      = opentelemetry::sdk::common::internal_log;
 namespace propagation = opentelemetry::context::propagation;
+
+//nostd::shared_ptr<trace::Span> Tracer::EMPTY_SPAN = opentelemetry::trace::NoopSpan;
 
 Tracer::Tracer(const std::string& app, const std::string& ver, TraceType t)
 {
   initTracer(app, ver, t);
   
-  log::GlobalLogHandler::SetLogHandler(nostd::shared_ptr<CustomLogHandler>());
-  log::GlobalLogHandler::SetLogLevel(log::LogLevel::Debug);
+  ot_log::GlobalLogHandler::SetLogHandler(nostd::shared_ptr<CustomLogHandler>());
+  ot_log::GlobalLogHandler::SetLogLevel(ot_log::LogLevel::Debug);
 
   propagation::GlobalTextMapPropagator::SetGlobalPropagator(nostd::shared_ptr<trace::propagation::JaegerPropagator>(new trace::propagation::JaegerPropagator()));
 }
 
 Tracer::~Tracer() 
 {
+  m_spanMap.clear();
+  m_parentSpans.clear();
+  m_activeScopes.clear();
   std::static_pointer_cast<trace_sdk::TracerProvider>(m_trace_provider)->Shutdown();
 }
 
@@ -67,7 +74,9 @@ void Tracer::initTracer(const std::string& app, const std::string& ver, TraceTyp
 
     case HTTP:
       {
-        opts.server_port = 5778;
+        opts.transport_format = opentelemetry::exporter::jaeger::TransportFormat::kThriftHttp;
+        opts.server_port      = 14268;
+        opts.headers          = {{}}; // optional headers
 
         auto exporter  = std::unique_ptr<trace_sdk::SpanExporter>(new jaeger::JaegerExporter(opts));
         auto processor = std::unique_ptr<trace_sdk::SpanProcessor>(new trace_sdk::SimpleSpanProcessor(std::move(exporter)));
@@ -111,14 +120,17 @@ std::shared_ptr<memory::InMemorySpanData> Tracer::InitInMemoryTracer(const std::
   return span_data;
 }
 
-void Tracer::InjectSpan(HttpTextMapCarrier<opentelemetry::ext::http::client::Headers> carrier)
+HttpTextMapCarrier<http::client::Headers> Tracer::InjectSpan()
 {
-  auto propagator = propagation::GlobalTextMapPropagator::GetGlobalPropagator();
+  HttpTextMapCarrier<http::client::Headers> carrier;
+  auto propagator  = propagation::GlobalTextMapPropagator::GetGlobalPropagator();
   auto current_ctx = opentelemetry::context::RuntimeContext::GetCurrent();
   propagator->Inject(carrier, current_ctx);
+
+  return carrier;
 }
 
-nostd::shared_ptr<trace::Span> Tracer::ExtractSpan(HttpTextMapCarrier<opentelemetry::ext::http::client::Headers> carrier)
+nostd::shared_ptr<trace::Span> Tracer::ExtractSpan(HttpTextMapCarrier<opentelemetry::ext::http::client::Headers>& carrier)
 {
   auto propagator  = propagation::GlobalTextMapPropagator::GetGlobalPropagator();
   auto current_ctx = opentelemetry::context::RuntimeContext::GetCurrent();

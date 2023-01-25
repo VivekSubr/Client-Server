@@ -1,4 +1,4 @@
-build:
+build: build-tls
 	make -C go_server build
 	make -C go_client build
 
