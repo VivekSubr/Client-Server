@@ -1,0 +1,1 @@
+* run.sh runs the otel collector and prometheus server

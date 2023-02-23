@@ -16,3 +16,6 @@
 [submodule "nghttp2"]
 	path = module/nghttp2
 	url = git@github.com:nghttp2/nghttp2.git
+[submodule "module/grpc"]
+	path = module/grpc
+	url = https://github.com/grpc/grpc.git
