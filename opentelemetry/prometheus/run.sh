@@ -1,7 +1,8 @@
 set -x
 
 rm -f otel.log prom.log
-killall prometheus
+pkill prometheus
+pkill otelcol
 
 #https://opentelemetry.io/docs/collector/getting-started/
 docker run -p 4317:4317 \

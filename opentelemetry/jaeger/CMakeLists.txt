@@ -2,11 +2,17 @@ cmake_minimum_required(VERSION 3.0.0)
 project(TracerExample VERSION 1.0.0)
 
 find_package(CURL REQUIRED) 
-find_package(Thrift REQUIRED) 
+find_package(protobuf REQUIRED)
+find_package(absl REQUIRED)
 find_package(opentelemetry-cpp CONFIG REQUIRED)
 find_package(Boost 1.71 COMPONENTS log REQUIRED )
-include_directories( ${Boost_INCLUDE_DIRS} )
 
+set(Boost_USE_STATIC_LIBS OFF) 
+set(Boost_USE_MULTITHREADED ON)  
+set(Boost_USE_STATIC_RUNTIME OFF) 
+set(CMAKE_CXX_COMPILER "/usr/bin/g++-12")
+
+include_directories( ${Boost_INCLUDE_DIRS} )
 include_directories(${CURL_INCLUDE_DIR})
 
 add_library(Tracer STATIC tracer.cc http.cc logger/logger.cc)

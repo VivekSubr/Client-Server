@@ -3,11 +3,13 @@ project(MetricsExample VERSION 1.0.0)
 
 find_package(protobuf REQUIRED)
 find_package(CURL REQUIRED)
+find_package(absl REQUIRED)
 find_package(opentelemetry-cpp CONFIG REQUIRED)
 
 set(Boost_USE_STATIC_LIBS OFF) 
 set(Boost_USE_MULTITHREADED ON)  
 set(Boost_USE_STATIC_RUNTIME OFF) 
+set(CMAKE_CXX_COMPILER "/usr/bin/g++-12")
 find_package(Boost 1.74.0 COMPONENTS program_options) 
 
 add_library(Metrics STATIC metrics_mock.cc metrics.cc)
@@ -47,3 +49,5 @@ target_link_libraries(
     pthread
     Metrics
 )
+
+message(STATUS "OPENTELEMETRY_CPP_INCLUDE_DIRS=${OPENTELEMETRY_CPP_INCLUDE_DIRS}")

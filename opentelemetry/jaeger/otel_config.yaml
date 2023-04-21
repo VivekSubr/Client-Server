@@ -5,10 +5,8 @@ receivers:
       http:
 
 exporters:
-  prometheus:
-    endpoint: '0.0.0.0:9090' # localhost:9090/metrics should be valid
-    namespace: default
-    send_timestamps: true
+  otlp:
+    endpoint: otelcol:4317
   logging:
     loglevel: debug
 
@@ -17,6 +15,7 @@ service:
     logs:
       level: debug
   pipelines:
-    metrics:
+    traces:
       receivers: [otlp]
-      exporters: [prometheus, logging]
+      processors: []
+      exporters: [otlp]

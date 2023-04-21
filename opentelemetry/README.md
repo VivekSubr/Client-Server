@@ -16,5 +16,5 @@ Opentelemetry code is expected to be built in module/opentelemetry-cpp.
 * Next, opentelemetry needs to be built
     cd $ROOT/module/opentelemetry-cpp
     mkdir build && cd build
-    cmake .. -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_CXX_STANDARD=17 -DBUILD_SHARED_LIBS=ON -DWITH_ABSEIL=ON -DWITH_STL=ON -DWITH_OTLP=ON -DWITH_OTLP_GRPC=ON -DWITH_JAEGER=ON -DBUILD_TESTING=OFF 
+    cmake .. -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_CXX_STANDARD=20 -DBUILD_SHARED_LIBS=ON -DWITH_ABSEIL=ON -DWITH_STL=ON -DWITH_OTLP=ON -DWITH_OTLP_GRPC=ON -DBUILD_TESTING=OFF -DCMAKE_INSTALL_PREFIX=$ROOT/module/opentelemetry-cpp
     cmake --build . --target all

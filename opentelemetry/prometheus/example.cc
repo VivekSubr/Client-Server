@@ -28,6 +28,7 @@ int main(int argc, char *argv[])
     }
 
     Metrics m("example", "0.1", "127.0.0.1:4317");
+    std::cout<<"Started...\n";
     while(true) 
     {
        std::string tok1, tok2, tok3;

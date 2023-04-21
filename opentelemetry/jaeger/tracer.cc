@@ -1,21 +1,17 @@
+#include <opentelemetry/exporters/otlp/otlp_grpc_exporter.h>
 #include <memory>
 #include <vector>
 #include "tracer.h"
-#include "opentelemetry/exporters/jaeger/jaeger_exporter.h"
 #include "opentelemetry/sdk/trace/simple_processor.h"
 #include "opentelemetry/sdk/trace/tracer_provider.h"
 #include "opentelemetry/trace/provider.h"
 #include "opentelemetry/trace/context.h"
-#include "opentelemetry/trace/propagation/jaeger.h"
 #include "opentelemetry/context/propagation/global_propagator.h"
 
 //https://opentelemetry.io/docs/instrumentation/cpp/manual/
 
-namespace jaeger      = opentelemetry::exporter::jaeger;
 namespace ot_log      = opentelemetry::sdk::common::internal_log;
 namespace propagation = opentelemetry::context::propagation;
-
-//nostd::shared_ptr<trace::Span> Tracer::EMPTY_SPAN = opentelemetry::trace::NoopSpan;
 
 Tracer::Tracer(const std::string& app, const std::string& ver, TraceType t)
 {
@@ -24,7 +20,7 @@ Tracer::Tracer(const std::string& app, const std::string& ver, TraceType t)
   ot_log::GlobalLogHandler::SetLogHandler(nostd::shared_ptr<CustomLogHandler>());
   ot_log::GlobalLogHandler::SetLogLevel(ot_log::LogLevel::Debug);
 
-  propagation::GlobalTextMapPropagator::SetGlobalPropagator(nostd::shared_ptr<trace::propagation::JaegerPropagator>(new trace::propagation::JaegerPropagator()));
+  //propagation::GlobalTextMapPropagator::SetGlobalPropagator(nostd::shared_ptr<trace::propagation::JaegerPropagator>(new trace::propagation::JaegerPropagator()));
 }
 
 Tracer::~Tracer() 
@@ -48,56 +44,37 @@ opentelemetry::sdk::resource::Resource Tracer::createResources()
 
 void Tracer::initTracer(const std::string& app, const std::string& ver, TraceType t)
 {
-  jaeger::JaegerExporterOptions opts;
-  opts.endpoint = "localhost";
-
   auto resource = createResources();
   auto always_on_sampler = std::unique_ptr<trace_sdk::AlwaysOnSampler>(new trace_sdk::AlwaysOnSampler);
 
   switch(t)
   {
-    case UDP:
-      {
-        opts.server_port = 6831;
+    case Otel_GRPC:
+    {
+      opentelemetry::exporter::otlp::OtlpGrpcExporterOptions opts;
+      opts.endpoint = "127.0.0.1:4317";
+      opts.use_ssl_credentials = false;
+        
+      auto exporter = std::unique_ptr<trace_sdk::SpanExporter>(new opentelemetry::exporter::otlp::OtlpGrpcExporter(opts));
+      auto processor = std::unique_ptr<trace_sdk::SpanProcessor>(new trace_sdk::SimpleSpanProcessor(std::move(exporter)));
+      std::vector<std::unique_ptr<trace_sdk::SpanProcessor>> v; v.push_back(std::move(processor));
 
-        auto exporter  = std::unique_ptr<trace_sdk::SpanExporter>(new jaeger::JaegerExporter(opts));
-        auto processor = std::unique_ptr<trace_sdk::SpanProcessor>(new trace_sdk::SimpleSpanProcessor(std::move(exporter)));
-        std::vector<std::unique_ptr<trace_sdk::SpanProcessor>> v; v.push_back(std::move(processor));
-        m_tracer_ctx = std::make_shared<trace_sdk::TracerContext>(
+      m_tracer_ctx = std::make_shared<trace_sdk::TracerContext>(
                               std::move(v), 
                               resource, 
                               std::move(always_on_sampler));
         
-        m_trace_provider =  std::shared_ptr<trace::TracerProvider>(new trace_sdk::TracerProvider(m_tracer_ctx));
-        m_tracer = m_trace_provider->GetTracer(app, ver);
-      } break;
-
-    case HTTP:
-      {
-        opts.transport_format = opentelemetry::exporter::jaeger::TransportFormat::kThriftHttp;
-        opts.server_port      = 14268;
-        opts.headers          = {{}}; // optional headers
-
-        auto exporter  = std::unique_ptr<trace_sdk::SpanExporter>(new jaeger::JaegerExporter(opts));
-        auto processor = std::unique_ptr<trace_sdk::SpanProcessor>(new trace_sdk::SimpleSpanProcessor(std::move(exporter)));
-        std::vector<std::unique_ptr<trace_sdk::SpanProcessor>> v; v.push_back(std::move(processor));
-        m_tracer_ctx = std::make_shared<trace_sdk::TracerContext>(
-                              std::move(v), 
-                              resource, 
-                              std::move(always_on_sampler));
-        
-        m_trace_provider =  std::shared_ptr<trace::TracerProvider>(new trace_sdk::TracerProvider(m_tracer_ctx));
-        m_tracer = m_trace_provider->GetTracer(app, ver);
-      } break;
+      m_trace_provider =  std::shared_ptr<trace::TracerProvider>(new trace_sdk::TracerProvider(m_tracer_ctx));
+      m_tracer = m_trace_provider->GetTracer(app, ver);
+    } break;
 
     case Memory:
-      {
-        std::unique_ptr<memory::InMemorySpanExporter> exporter(new memory::InMemorySpanExporter());
-        InitInMemoryTracer(app, ver, std::move(exporter));
-      } break;
+    {
+      std::unique_ptr<memory::InMemorySpanExporter> exporter(new memory::InMemorySpanExporter());
+      InitInMemoryTracer(app, ver, std::move(exporter));
+    } break;
 
-    default:
-      exit(-1);
+    default: exit(-1);
   }
 }
 

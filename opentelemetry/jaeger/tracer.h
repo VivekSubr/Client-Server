@@ -16,8 +16,7 @@ namespace http       = opentelemetry::ext::http;
 namespace memory     = opentelemetry::exporter::memory;
 
 enum TraceType {
-   UDP = 0,
-   HTTP,
+   Otel_GRPC = 0,
    Memory
 };
 
@@ -82,17 +81,15 @@ class Tracer
   Tracer(const std::string& app, const std::string& ver, TraceType t);
   ~Tracer();
 
-  void StartSpan(const std::string& spanName) { 
-    if(m_currentSpan) m_parentSpans.push_back(m_currentSpan);
-    m_currentSpan  = m_tracer->StartSpan(spanName);
-    m_activeScopes.push_back(m_tracer->WithActiveSpan(m_currentSpan)); 
+  nostd::shared_ptr<trace::Span> StartSpan(const std::string& spanName) { 
+    return m_tracer->StartSpan(spanName);
   }
 
   nostd::shared_ptr<trace::Span> GetCurrentSpan() {
     return m_currentSpan;
   }
 
-  trace::SpanId SaveSpan() {
+  /*trace::SpanId SaveSpan() {
     if(!m_currentSpan) return trace::SpanId();
     
     auto id = m_currentSpan->GetContext().span_id();
@@ -106,7 +103,7 @@ class Tracer
     
     m_currentSpan = m_spanMap.at(id);
     return true;
-  }
+  }*/
 
   trace::SpanId GetSpanId() {
     return GetCurrentSpan()->GetContext().span_id();
@@ -129,7 +126,7 @@ class Tracer
   std::shared_ptr<trace_sdk::TracerContext> m_tracer_ctx;
   std::shared_ptr<trace::TracerProvider>    m_trace_provider;
   std::unordered_map<TraceType, std::string> sTraceType = {
-    {UDP, "udp"}, {HTTP, "http"}, {Memory, "memory"}
+    {Otel_GRPC, "otel grpc"}, {Memory, "memory"}
   };
 
   nostd::shared_ptr<trace::Span>                          m_currentSpan{nullptr};

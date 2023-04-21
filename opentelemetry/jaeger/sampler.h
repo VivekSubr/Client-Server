@@ -1,4 +1,5 @@
 #pragma once
+#include <math.h>
 #include "opentelemetry/sdk/trace/sampler.h"
 
 namespace trace_sdk  = opentelemetry::sdk::trace;

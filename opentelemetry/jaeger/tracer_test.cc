@@ -4,12 +4,10 @@
 #include "logger/logger.h"
 #include <fstream>
 
-#include "opentelemetry/exporters/jaeger/jaeger_exporter.h"
 #include "opentelemetry/sdk/trace/simple_processor.h"
 #include "opentelemetry/sdk/trace/tracer_provider.h"
 #include "opentelemetry/trace/provider.h"
 #include "opentelemetry/trace/context.h"
-#include "opentelemetry/trace/propagation/jaeger.h"
 #include "opentelemetry/context/propagation/global_propagator.h"
 #include <opentelemetry/sdk/trace/samplers/trace_id_ratio.h>
 

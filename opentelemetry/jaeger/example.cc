@@ -33,9 +33,8 @@ int main(int argc, char *argv[])
     while(std::getline(std::cin, str)) 
     {
         trim(str);
-        TraceType t = UDP;
-        if(str == "http") t = HTTP; 
-        else if(str == "mem") t = Memory;
+        TraceType t = Otel_GRPC;
+        if(str == "mem") t = Memory;
 
         bool ret = client.post(sServerIP, "test1", "{\name\" : \"test1\"}", t);
         std::cout<<"sent: "<<ret<<"\n";
