@@ -1,10 +1,20 @@
-#include "opentelemetry/exporters/otlp/otlp_grpc_metric_exporter_factory.h"
+#ifdef GRPC_EXPORTER
+    #include "opentelemetry/exporters/otlp/otlp_grpc_metric_exporter_factory.h"
+#else 
+    #include "opentelemetry/exporters/prometheus/exporter.h"
+#endif
+
 #include "metrics.h"
 #include "metrics_logger.h"
 #include "opentelemetry/sdk/metrics/export/periodic_exporting_metric_reader.h"
 #include "opentelemetry/metrics/provider.h"
 
-namespace otlp_exporter = opentelemetry::exporter::otlp;
+#ifdef GRPC_EXPORTER
+    namespace otlp_exporter    = opentelemetry::exporter::otlp;
+#else
+    namespace metrics_exporter = opentelemetry::exporter::metrics;
+    namespace metrics_sdk      = opentelemetry::sdk::metrics;
+#endif
 
 Metrics::Metrics(const std::string& name, const std::string& ver, const std::string& url): 
                                                                    m_metricsName(name), m_metricsVer(ver), m_url(url), 
@@ -16,6 +26,7 @@ Metrics::Metrics(const std::string& name, const std::string& ver, const std::str
         return;
     } 
 
+#ifdef GRPC_EXPORTER
     otlp_exporter::OtlpGrpcMetricExporterOptions grpc_options;
     grpc_options.endpoint = m_url;
     grpc_options.use_ssl_credentials = false;
@@ -25,8 +36,16 @@ Metrics::Metrics(const std::string& name, const std::string& ver, const std::str
     options.export_interval_millis = std::chrono::milliseconds(1000);
     options.export_timeout_millis  = std::chrono::milliseconds(500);
     std::unique_ptr<metric_sdk::MetricReader> reader{new metric_sdk::PeriodicExportingMetricReader(std::move(exporter), options)};
-            
+
     m_meterProvider->AddMetricReader(std::move(reader));
+#else
+    metrics_exporter::PrometheusExporterOptions opts;
+    opts.url = m_url;
+    std::shared_ptr<metrics_sdk::MetricReader> exporter(new metrics_exporter::PrometheusExporter(opts));
+
+    m_meterProvider->AddMetricReader(exporter);
+#endif
+        
     m_meter = m_meterProvider->GetMeter(m_metricsName, m_metricsVer, "");
 
     ot_log::GlobalLogHandler::SetLogHandler(nostd::shared_ptr<MetricsLogHandler>());
