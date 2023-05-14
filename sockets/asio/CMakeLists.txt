@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 find_package(Boost 1.71 REQUIRED)
+include_directories("../.")
 
 add_executable(asio_client client.cc)
 add_executable(asio_server server.cc)

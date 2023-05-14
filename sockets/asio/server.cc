@@ -7,18 +7,15 @@
 #include <boost/asio/signal_set.hpp>
 #include <boost/asio/write.hpp>
 #include <cstdio>
+#include <utils.h>
 
 using boost::asio::ip::tcp;
 using boost::asio::awaitable;
 using boost::asio::co_spawn;
 using boost::asio::detached;
 using boost::asio::use_awaitable;
+namespace ip = boost::asio::ip;
 namespace this_coro = boost::asio::this_coro;
-
-#if defined(BOOST_ASIO_ENABLE_HANDLER_TRACKING)
-# define use_awaitable \
-  boost::asio::use_awaitable_t(__FILE__, __LINE__, __PRETTY_FUNCTION__)
-#endif
 
 awaitable<void> echo(tcp::socket socket)
 {
@@ -37,10 +34,14 @@ awaitable<void> echo(tcp::socket socket)
   }
 }
 
-awaitable<void> listener()
+awaitable<void> listener(std::unique_ptr<host> host)
 {
-  auto executor = co_await this_coro::executor;
-  tcp::acceptor acceptor(executor, {tcp::v4(), 55555});
+  //https://stackoverflow.com/questions/65821773/what-is-the-implement-of-asiothis-coroexecutor
+  auto executor = co_await this_coro::executor; 
+
+  //https://www.boost.org/doc/libs/1_82_0/doc/html/boost_asio/reference/basic_socket_acceptor/basic_socket_acceptor/overload6.html
+  //First arg is execution context, second is tcp endpoint 
+  tcp::acceptor acceptor(executor, ip::tcp::endpoint{ip::address::from_string(host->ip), host->port});
   for (;;)
   {
     tcp::socket socket = co_await acceptor.async_accept(use_awaitable);
@@ -48,21 +49,40 @@ awaitable<void> listener()
   }
 }
 
-int main()
+int main(int argc, char **argv)
 {
   try
   {
+    //https://www.boost.org/doc/libs/1_76_0/doc/html/boost_asio/overview/core/basics.html
+    //"This I/O execution context represents your program's link to the operating system's I/O services"
     boost::asio::io_context io_context(1);
 
     boost::asio::signal_set signals(io_context, SIGINT, SIGTERM);
     signals.async_wait([&](auto, auto){ io_context.stop(); });
 
-    co_spawn(io_context, listener(), detached);
+    auto h = getHostFromArg(argc, argv, 1, 2);
+    if(h == nullptr)
+    {
+      std::cout<<"Defaulting to localhost:3000\n";
+      h = std::make_unique<host>("localhost", 3000);
+    }
 
-    io_context.run();
+    //https://www.boost.org/doc/libs/1_82_0/doc/html/boost_asio/reference/co_spawn.html
+    //"Spawn a new coroutined-based thread of execution." (not actual thread)
+    //Here, io_context is the execution context, listener is the awaitable and completion token is detached
+    //https://think-async.com/Asio/asio-1.22.2/doc/asio/overview/model/completion_tokens.html
+    //https://think-async.com/Asio/asio-1.22.2/doc/asio/reference/detached_t.html
+    co_spawn(io_context, listener(std::move(h)), detached);
+
+    std::cout<<"Listening...\n";
+    //"While inside the call to io_context::run(), the I/O execution context dequeues the result of the operation, 
+    // translates it into an error_code, and then passes it to your completion handler."
+    io_context.run(); //blocking call
   }
   catch (std::exception& e)
   {
     std::printf("Exception: %s\n", e.what());
   }
+
+  return 0;
 }
