@@ -12,8 +12,8 @@ int main(int argc, char **argv)
     auto h = getHostFromArg(argc, argv, 1, 2);
     if(h == nullptr)
     {
-      std::cout<<"Defaulting to localhost:55555\n";
-      h = std::make_unique<host>("127.0.0.1", 55555);
+      std::cout<<"Defaulting to localhost:3000\n";
+      h = std::make_unique<host>("127.0.0.1", 3000);
     }
 
     tcp::socket socket(io_service);//socket creation
@@ -38,14 +38,15 @@ int main(int argc, char **argv)
         cout << "send failed: " << error.message() << endl;
     }
 
-    boost::asio::streambuf receive_buffer;
-    boost::asio::read(socket, receive_buffer, boost::asio::transfer_all(), error);
+    std::vector<char> buf(1024);
+    size_t len = socket.read_some(boost::asio::buffer(buf), error);
+    std::cout<<"Revieved len : "<<len<<"\n";
     if( error && error != boost::asio::error::eof ) {
         cout << "receive failed: " << error.message() << endl;
     }
     else {
-        const char* data = boost::asio::buffer_cast<const char*>(receive_buffer.data());
-        cout << data << endl;
+       std::string s{buf.begin(), buf.end()};
+       std::cout<<s<<endl;
     }
     
     return 0;

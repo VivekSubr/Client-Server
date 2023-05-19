@@ -7,12 +7,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 find_package(Boost 1.71 REQUIRED)
 include_directories("../.")
+include_directories(${Boost_INCLUDE_DIRS})
 
 add_executable(asio_client client.cc)
 add_executable(asio_server server.cc)
 
-target_link_libraries(asio_client ${Boost_LIBRARIES})
-target_link_libraries(asio_server ${Boost_LIBRARIES})
-
-target_include_directories(asio_client PRIVATE ${Boost_INCLUDE_DIRS})
-target_include_directories(asio_server PRIVATE ${Boost_INCLUDE_DIRS})
+link_libraries(${Boost_LIBRARIES})
