@@ -1,0 +1,1 @@
+Example of usage of posix function getaddrinfo_a to perform asynchronous dns query.

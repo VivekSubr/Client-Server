@@ -4,6 +4,7 @@
 #include <boost/asio/detached.hpp>
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/ip/tcp.hpp>
+#include <boost/asio/ip/udp.hpp>
 #include <boost/asio/signal_set.hpp>
 #include <boost/asio/write.hpp>
 #include <cstdio>
@@ -14,6 +15,25 @@ using namespace boost;
 namespace ip = boost::asio::ip;
 
 asio::awaitable<void> echo(tcp::socket socket)
+{
+  try
+  {
+    char data[1024];
+    for(;;)
+    {
+      std::size_t n = co_await socket.async_read_some(boost::asio::buffer(data), asio::use_awaitable);
+      std::cout<<"echo "<<data<<", size "<<n<<"\n";
+      
+      co_await async_write(socket, boost::asio::buffer(data, n), asio::use_awaitable);
+    }
+  }
+  catch (std::exception& e)
+  {
+    std::printf("echo Exception: %s\n", e.what());
+  }
+}
+
+asio::awaitable<void> udp_echo(ip::udp::socket socket)
 {
   try
   {
@@ -50,6 +70,19 @@ asio::awaitable<void> listener(std::unique_ptr<host> host)
   }
 }
 
+asio::awaitable<void> udp_listener(std::unique_ptr<host> host)
+{
+  auto executor = co_await asio::this_coro::executor; 
+  auto endpoint = ip::udp::endpoint{ip::address::from_string(host->ip), host->port};
+  
+  std::cout<<"Listening...\n";
+  for(;;)
+  {
+    ip::udp::socket socket(executor, endpoint);  
+    asio::co_spawn(executor, udp_echo(std::move(socket)), asio::detached);
+  }
+}
+
 int main(int argc, char **argv)
 {
   try
@@ -61,7 +94,7 @@ int main(int argc, char **argv)
     asio::signal_set signals(io_context, SIGINT, SIGTERM);
     signals.async_wait([&](auto, auto){ io_context.stop(); });
 
-    auto h = getHostFromArg(argc, argv, 1, 2);
+    auto h = getHostFromArg(argc, argv, 2, 3);
     if(h == nullptr)
     {
       std::cout<<"Defaulting to localhost:3000\n";
