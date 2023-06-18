@@ -5,10 +5,15 @@ Opentelemetry code is expected to be built in module/opentelemetry-cpp.
 
 * install abseil (eg: sudo apt install libabsl-dev)
 
-* GRPC is a dependency and hence must be built first,
+* Try to use ci scripts of opentelemetery-cpp repo to install dependedencies if possible, 
+    sudo -E ./ci/setup_ci_environment.sh
+    sudo -E ./ci/install_protobuf.sh 
+    sudo ./ci/setup_grpc.sh
+
+* if not, install protobuf and then grpc,
     cd $ROOT/module/grpc
     mkdir -p cmake/build && cd cmake/build
-    cmake -DCMAKE_PREFIX_PATH=$ROOT/abseil-cpp -DgRPC_INSTALL=ON -DgRPC_BUILD_TESTS=OFF -DCMAKE_INSTALL_PREFIX=/usr ../..
+    cmake -DgRPC_INSTALL=ON -DgRPC_BUILD_TESTS=OFF -DCMAKE_INSTALL_PREFIX=/usr ../..
     (If this errors, may try recloning grpc repo)
     make -j 4
     sudo make install
