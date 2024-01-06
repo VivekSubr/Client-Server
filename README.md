@@ -14,4 +14,13 @@ To use the client, libcurl with nghttp2 backend needs to be compiled and env var
 
 
 ## opentelemetry 
-Example showcasing Jaeger usage using opentelemetry cpp SDK?
+Example showcasing Jaeger usage using opentelemetry cpp SDK
+
+
+
+
+## Note on github
+If 'git push' asks for password and github rejects that password not supported ("remote: Support for password authentication was removed on August 13, 2021."), then we need to paste personal access token rather than password
+https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens
+
+
