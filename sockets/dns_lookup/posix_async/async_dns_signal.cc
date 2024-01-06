@@ -25,8 +25,8 @@ int signalfd_setup(int signal, int& sfd)
     int epfd = epoll_create(1);
  
     struct epoll_event ev;
-	ev.events  = EPOLLIN | EPOLLOUT | EPOLLET;
-	ev.data.fd = sfd;
+	ev.events = EPOLLIN;
+    ev.data.fd = sfd;
 	if(epoll_ctl(epfd, EPOLL_CTL_ADD, sfd, &ev) == -1) {
 		std::cout<<"failed initial epoll_ctl\n";
         return -1;

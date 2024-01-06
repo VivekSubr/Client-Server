@@ -3,13 +3,14 @@
 #include "opentelemetry/metrics/meter.h"
 #include "opentelemetry/metrics/meter_provider.h"
 #include "opentelemetry/metrics/sync_instruments.h"
+#include "opentelemetry/metrics/async_instruments.h"
 #include "opentelemetry/sdk/metrics/meter_provider.h"
 
 namespace metrics    = opentelemetry::metrics;
 namespace metric_sdk = opentelemetry::sdk::metrics;
 namespace nostd      = opentelemetry::nostd;
 
-class Metrics 
+class Metrics
 {
 public:
     using SyncInstrument       = nostd::unique_ptr<metrics::SynchronousInstrument>;
