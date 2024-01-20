@@ -1,4 +1,4 @@
-Opentelemetry implementations for tracing using jaeger, metrics using prometheus and logging using elastic.
+Opentelemetry implementations for tracing using jaeger, metrics using prometheus and logging using postgres
 
 Opentelemetry code is expected to be built in module/opentelemetry-cpp. 
 * git submodule update --force --init --recursive to download dependencies
@@ -23,3 +23,6 @@ Opentelemetry code is expected to be built in module/opentelemetry-cpp.
     mkdir build && cd build
     cmake .. -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_CXX_STANDARD=20 -DBUILD_SHARED_LIBS=ON -DWITH_ABSEIL=ON -DWITH_STL=ON -DWITH_OTLP_GRPC=ON -DBUILD_TESTING=OFF -DWITH_PROMETHEUS=ON -DCMAKE_INSTALL_PREFIX=$ROOT/module/opentelemetry-cpp
     cmake --build . --target all
+    make install
+
+
