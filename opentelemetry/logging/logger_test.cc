@@ -18,4 +18,6 @@ TEST_F(TestLogger, FmtLog)
     logger.Log(LogLevel::Debug, "testBody");
     logger.Break();
     logger.LogFmt(LogLevel::Debug, "{} {} {}\n", "Test", "Fmt", "Log");
+
+    logger.LogStream(LogLevel::Info, "testStream") << "streaming1" << "streaming2";
 }

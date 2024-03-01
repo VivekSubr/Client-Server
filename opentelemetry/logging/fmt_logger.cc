@@ -36,7 +36,11 @@ void FmtLogger::Log(LogLevel level, const std::string& log) const
      fmt::print("{} {}\n{}\n", m_name, std::chrono::system_clock::now(), log);
 }
 
-void FmtLogger::Break() const
+FmtLogger::LoggerStream FmtLogger::LogStream(LogLevel level, const std::string& log)
 {
-     fmt::print("{}\n", m_breakStr);
+     auto dbg = getDebugLevel(level);
+     fmt::print(fg(dbg.first), "\n{} ", dbg.second);
+     fmt::print("{} {}\n{}", m_name, std::chrono::system_clock::now(), log);
+
+     return LoggerStream{};
 }

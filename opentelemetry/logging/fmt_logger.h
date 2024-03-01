@@ -28,7 +28,7 @@ public:
 
     /*
        Line 1: DEBUG_LEVEL, LOGGER-NAME, TIMESTAMP (HH-MM-SS : DD-MM-YYYY) (ie, all meta data)
-       Line 2: 
+       Line 2: Log body, as built by format string and args
     */
     template <typename... Args>
     void LogFmt(LogLevel level, const std::string& log_fmt, const Args&... args) const
@@ -38,14 +38,28 @@ public:
         fmt::print(log_fmt, args...);
     }
 
-    void Break() const;
+    struct LoggerStream 
+    {
+        template <typename T>
+        LoggerStream operator<<(const T& log) 
+        {
+            fmt::print("  {}", log); 
+            return LoggerStream{};
+        }
+    };
+   
+    // This api supports chaining logs with << operator
+    LoggerStream LogStream(LogLevel level, const std::string& log);
+
+    void Break()     const { fmt::print("{}\n", m_breakStr); }
+    void LineBreak() const { fmt::print("\n"); }
 
     std::string GetName() const { return m_name; }
     void SetBreakStr(const std::string& breakStr) { m_breakStr = breakStr; }
 
 private:
     const std::string m_name;
-    std::string m_breakStr = "**********************************";
+    std::string       m_breakStr = "**********************************";
 
     std::pair<fmt::color, std::string> getDebugLevel(LogLevel level) const;
 };
