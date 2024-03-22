@@ -1,7 +1,7 @@
 #include "util.h"
 /*
  Here, we use libcurl easy interface for http2 client
- */
+*/
 
 static int sockopt_callback(void *clientp, curl_socket_t curlfd, curlsocktype purpose)
 {
