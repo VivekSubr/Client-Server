@@ -47,10 +47,10 @@ int main(int argc, char *argv[])
         return retError((std::string)"failed to setsockopt tcp nodelay" + strerror(errno)); 
     }
 
-    if(connect(sock, (struct sockaddr*)&client, sizeof(client)) && errno != EINPROGRESS) {
+    if((connect(sock, (struct sockaddr*)&client, sizeof(client)) < 0) && errno != EINPROGRESS) {
         return retError((std::string)"failed to connect socket error " + std::to_string(errno) + ", " + strerror(errno)); 
     }
-    std::cout<<"connected to "<<sIP<<":"<<iPort<<"\n";
+    std::cout<<"connected to "<<sIP<<":"<<iPort<<" on fd "<<sock<<"\n";
 
     /*** setup NG_HTTP2 ***/
     nghttp2_session_callbacks *callbacks;
@@ -60,6 +60,8 @@ int main(int argc, char *argv[])
     
     nghttp2_session *session;
     struct Connection con(sock, session);
+
+    //This just initializes session
     if(nghttp2_session_client_new(&session, callbacks, &con) != 0) return retError("nghttp2_session_client_new failed");
 
     nghttp2_session_callbacks_del(callbacks);

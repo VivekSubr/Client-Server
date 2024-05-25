@@ -1,3 +1,6 @@
+init:
+	go mod init
+
 build:
 	go build
 

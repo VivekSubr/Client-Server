@@ -40,3 +40,9 @@ std::string getHostFromArg(int index, int argc, char **argv)
 
     return host;
 }
+
+int retError(const std::string& str)
+{
+    std::cout<<str<<"\n";
+    return -1;
+}

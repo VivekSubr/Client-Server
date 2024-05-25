@@ -10,6 +10,7 @@
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unordered_map>
 
 /*
   let's implement a simple tcp server using epoll
@@ -23,6 +24,23 @@
 #define MAX_EVENTS     32
 //size of buffer used in bytes for data transfer
 #define BUF_SIZE       256
+
+void printReadError(int error)
+{
+    std::unordered_map<int, std::string> read_errors = {
+        {EAGAIN, "EAGAIN"}, {EWOULDBLOCK, "EWOULDBLOCK"}, {EBADF, "EBADF"}, {EFAULT, "EFAULT"},
+        {EINTR , "EINTR"}, {EINVAL, "EINVAL"}, {EIO, "EIO"}
+    };
+
+    std::string sError;
+    try { sError = read_errors.at(error); }
+    catch(...)
+    {
+      sError = "UNKNOWN_ERROR";
+    }
+
+    std::cout<<"read error, "<<sError<<" "<<strerror(error)<<"\n";
+}
 
 int main(int argc, char *argv[])
 {
@@ -42,7 +60,12 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 
-  listen(listen_sock, MAX_CONN);
+  if(listen(listen_sock, MAX_CONN) < 0)
+  {
+    std::cout<<"Listed failed "<<errno<<"\n";
+    return -1;  
+  }
+
   /********************************************************************/
 
   /********************************************************************/
@@ -72,12 +95,14 @@ int main(int argc, char *argv[])
   {
     bzero(buf, sizeof(buf));
     nfds = epoll_wait(epfd, events, MAX_EVENTS, -1); //blocking, till even occurs on socket.
-    for(int i = 0; i < nfds; i++) { 
-      if(events[i].data.fd == listen_sock) { //new connection on socket
+    for(int i = 0; i < nfds; i++) 
+    { 
+      if(events[i].data.fd == listen_sock) 
+      { //new connection on socket
         conn_sock = accept(listen_sock, (struct sockaddr *)&client_addr, &socklen);
-
+  
         if(fcntl(conn_sock, F_SETFD, fcntl(conn_sock, F_GETFD, 0) | O_NONBLOCK) ==-1) { 
-          std::cout<<"failed to set client socket to be non blocking\n";
+          std::cout<<"failed to set connected socket to be non blocking\n";
 		      return -1;
 	      }
 
@@ -92,28 +117,36 @@ int main(int argc, char *argv[])
 		        std::cout<<"failed epoll_ctl\n";
             return -1;
 	      }
-
-      } else if(events[i].events & EPOLLIN) { 
-        while(true) 
+      } 
+      else if(events[i].events & EPOLLIN) 
+      { 
+        do 
         {
           bzero(buf, sizeof(buf));
-          read_sz = read(events[i].data.fd, buf, sizeof(buf));
+          read_sz = read(conn_sock, buf, sizeof(buf));
           
-          if(read_sz == 0) break;
           if(read_sz < 0) {
-            std::cout<<"failed to read\n";
+            printReadError(errno);
             break;
           }
-          else {
+          else if(read_sz > 0) {
             std::cout<<"data "<<buf<<"\n";
-						write(events[i].data.fd, buf, read_sz);
+						if(write(conn_sock, buf, read_sz) < 0) {
+              std::cout<<"write error\n";
+              break;
+            }
           }
-        }
-      } else { //unknown event, shouldn't happen
+          else std::cout<<"No bytes read\n";
+
+        } while(read_sz > 0);
+      } 
+      else 
+      { //unknown event, shouldn't happen
         std::cout<<"unexpected event\n";
       }
 
-      if (events[i].events & (EPOLLRDHUP | EPOLLHUP)) {
+      if (events[i].events & (EPOLLRDHUP | EPOLLHUP)) 
+      {
 				std::cout<<"connection closed\n";
 				epoll_ctl(epfd, EPOLL_CTL_DEL, events[i].data.fd, NULL);
 				close(events[i].data.fd);

@@ -57,7 +57,5 @@ int main()
 
     for (int i = 0; i < CNT; ++i) http2POST(cm, "{\name\" : \"test1\"}", i);
 
-    while(true) { }
-
     return 0;
 }

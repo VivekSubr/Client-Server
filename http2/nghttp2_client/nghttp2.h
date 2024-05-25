@@ -121,7 +121,7 @@ static nghttp2_ssize recv_callback(nghttp2_session *session, uint8_t *buf, size_
     }
     else 
     {
-      std::cout<<"recv_callback, failed to read, error "<<errno<<" ,"<<strerror(errno)<<"\n";
+      std::cout<<" recv_callback, failed to read, error "<<errno<<" ,"<<strerror(errno)<<"\n";
       return -1;
     }
   }
