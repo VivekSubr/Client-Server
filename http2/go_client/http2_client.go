@@ -54,6 +54,6 @@ func main() {
 		body, _ := io.ReadAll(resp.Body)
 		fmt.Println("response Body:", string(body))
 
-		time.Sleep(2 * time.Second)
+		time.Sleep(15 * time.Second)
 	}
 }
