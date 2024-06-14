@@ -24,3 +24,4 @@ std::unique_ptr<host> getHostFromArg(int argc, char** argv, int ipIndex, int por
     if(argc < ipIndex || argc < portIndex) return nullptr;
     return std::make_unique<host>(argv[ipIndex], std::atoi(argv[portIndex]));
 }
+

@@ -3,16 +3,19 @@
 #include <unistd.h>
 #include "utils.h"
 
-int main()
+int main(int argc,  char **argv)
 {
+    auto host = getHostFromArg(argc, argv, 1, 2);
+    if(host == nullptr) retError("need to specify ip and port");
+
     int sock = socket(AF_INET, SOCK_STREAM, 0);
     if(sock < 0 ) retError("failed to create socket");
     std::cout<<"created socket : "<<sock;
 
     struct sockaddr_in client;
     client.sin_family = AF_INET;
-    inet_aton("127.0.0.1", &client.sin_addr);
-    client.sin_port = htons(3000);
+    inet_aton(host->ip.c_str(), &client.sin_addr);
+    client.sin_port = htons(host->port);
 
     uint8_t dscp = 46 << 2;
     if(setsockopt(sock, IPPROTO_IP, IP_TOS, &dscp, sizeof(dscp)) < 0) retError("failed to setsockopt"); 

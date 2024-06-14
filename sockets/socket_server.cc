@@ -5,8 +5,11 @@
 #include <unistd.h>
 #include "utils.h"
 
-int main()
+int main(int argc,  char **argv)
 {
+    auto host = getHostFromArg(argc, argv, 1, 2);
+    if(host == nullptr) retError("need to specify ip and port");
+
     int sock = socket(AF_INET, SOCK_STREAM, 0);
     if(sock < 0 ) retError("failed to create socket");
     std::cout<<"created socket : "<<sock<<"\n";
@@ -14,7 +17,7 @@ int main()
     struct sockaddr_in server;
     server.sin_family = AF_INET;
     server.sin_addr.s_addr = INADDR_ANY;
-    server.sin_port = htons(3000);
+    server.sin_port = htons(host->port);
 
     if(bind(sock, (struct sockaddr*)&server, sizeof(server)) < 0) retError("failed to bind socket");
     std::cout<<"bound socket\n";
@@ -22,7 +25,7 @@ int main()
     if(listen(sock, 3) == -1) retError("failed to listen");
     std::cout<<"listening...\n";
 
-    int client_sock, read_sz, c = sizeof(struct sockaddr_in);
+    int client_sock, read_sz, c{sizeof(struct sockaddr_in)};
     struct sockaddr_in client;
     char buf[256];
     std::string reply = "received";
