@@ -1,7 +1,7 @@
 set -x
 
 #clean
-rm -f *.pem *.cer
+rm -f *.pem *.cert
 
 #generate private key
 #This key is a 1024 bit RSA key which is encrypted using Triple-DES and stored in a PEM format so 
