@@ -1,6 +1,8 @@
 #pragma once
 #include "gtest/gtest.h"
-#include "logger.h"
+#define private public
+    #include "logger.h"
+#undef private
 
 class TestLogger : public ::testing::Test
 {

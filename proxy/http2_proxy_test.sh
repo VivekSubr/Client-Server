@@ -2,8 +2,8 @@ set -x
 
 function kill_proc() {
     killall envoy
-    killall client
-    killall http2-example
+    killall http2_client
+    killall server
     killall tlsServer
     killall tlsClient
 }
@@ -14,8 +14,8 @@ SERVER_IP=127.0.0.1
 CLIENT_IP=127.0.0.1
 SERVER_PORT=1447
 CLIENT_PORT=10000
-GO_SERVER=go_server/http2-example
-GO_CLIENT=go_client/client
+GO_SERVER=go_server/server
+GO_CLIENT=go_client/http2_client
 ADDL_SERVER_FLAGS=
 ADDL_CLIENT_FLAGS=
 

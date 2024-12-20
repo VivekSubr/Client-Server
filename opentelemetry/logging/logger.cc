@@ -5,6 +5,7 @@
 Logger::Logger(const std::string& name, const std::string& caller_name):
         m_logger(opentelemetry::logs::Provider::GetLoggerProvider()->GetLogger(name, caller_name))
 {
+  std::cout<<"***Logger::Logger\n";
 }
 
 //EmitLogRecord can take several types of args,

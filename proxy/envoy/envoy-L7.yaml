@@ -43,14 +43,13 @@ static_resources:
               - endpoint:
                   address:
                     socket_address: { address: 127.0.0.1, port_value: 1447 } 
-      #commenting as keep hitting bind failures
-      #upstream_bind_config: #options for bind of ephermeral socket used to communicate to endpoint
-        #source_address: { address: 127.0.0.2, port_value: 9999 }
-        #socket_options:
-        #- level: 0        
-          #name: 1         
-          #int_value: 64   
-          #state: STATE_PREBIND  
+      upstream_bind_config: #options for bind of ephermeral socket used to communicate to endpoint
+        source_address: { address: "0.0.0.0", port_value: 0 }
+        socket_options:
+        - level: 0        
+          name: 1         
+          int_value: 32   
+          state: STATE_PREBIND  
       typed_extension_protocol_options:
         envoy.extensions.upstreams.http.v3.HttpProtocolOptions:
           "@type": type.googleapis.com/envoy.extensions.upstreams.http.v3.HttpProtocolOptions
