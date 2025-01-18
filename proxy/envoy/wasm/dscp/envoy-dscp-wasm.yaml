@@ -4,7 +4,7 @@ static_resources:
       address:
         socket_address: { address: 0.0.0.0, port_value: 10000 }
       filter_chains:
-        - filters:
+       - filters:
           - name: envoy.filters.network.wasm
             typed_config:
               "@type": type.googleapis.com/envoy.extensions.filters.network.wasm.v3.Wasm
@@ -14,15 +14,33 @@ static_resources:
                   runtime: "envoy.wasm.runtime.v8"
                   code:
                     local:
-                      filename: "/home/vivek/dscp-filter.wasm"
+                      filename: "/home/vivek/Client-Server/proxy/envoy/wasm/dscp/proxy-wasm-cpp-sdk/dscp/dscp-filter.wasm"
                   allow_precompiled: true
-                  
-          - name: envoy.filters.network.tcp_proxy
-            typed_config:
-              "@type": type.googleapis.com/envoy.extensions.filters.network.tcp_proxy.v3.TcpProxy
-              stat_prefix: destination
-              cluster: cluster_0
 
+          - name: envoy.filters.network.http_connection_manager # https://www.envoyproxy.io/docs/envoy/latest/configuration/http/http_conn_man/http_conn_man#config-http-conn-man
+            typed_config:
+              "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
+              codec_type: HTTP2
+              stat_prefix: ex
+              use_remote_address: true
+              http2_protocol_options:
+                max_concurrent_streams: 1
+              route_config: #https://www.envoyproxy.io/docs/envoy/latest/configuration/http/http_conn_man/route_matching
+                name: all
+                virtual_hosts:
+                  - name: example
+                    domains:
+                      - '*'
+                    routes:
+                      - match: { prefix: / } 
+                        route:
+                          cluster: cluster_0
+                          
+              http_filters:
+                - name: envoy.filters.http.router #https://www.envoyproxy.io/docs/envoy/latest/configuration/http/http_filters/router_filter#config-http-filters-router
+                  typed_config:
+                    "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
+                    
   clusters:
     - name: cluster_0
       connect_timeout: 30s
@@ -33,3 +51,25 @@ static_resources:
               - endpoint:
                   address:
                     socket_address: { address: 127.0.0.1, port_value: 1447 } 
+      typed_extension_protocol_options:
+        envoy.extensions.upstreams.http.v3.HttpProtocolOptions:
+          "@type": type.googleapis.com/envoy.extensions.upstreams.http.v3.HttpProtocolOptions
+          upstream_http_protocol_options:
+            auto_sni: false
+            auto_san_validation: false
+          explicit_http_config:
+            http2_protocol_options: {}
+          http_filters:
+            - name: envoy.filters.http.wasm
+              typed_config:
+                "@type": type.googleapis.com/envoy.extensions.filters.http.wasm.v3.Wasm
+                config:
+                  name: "dscp_filter"
+                  vm_config:
+                    code:
+                      local:
+                        filename: "/home/vivek/Client-Server/proxy/envoy/wasm/dscp/proxy-wasm-cpp-sdk/dscp/dscp-filter.wasm"
+
+            - name: envoy.filters.http.upstream_codec
+              typed_config:
+                "@type": type.googleapis.com/envoy.extensions.filters.http.upstream_codec.v3.UpstreamCodec

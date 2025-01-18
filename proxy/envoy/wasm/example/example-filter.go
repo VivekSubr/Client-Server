@@ -15,6 +15,8 @@
 package main
 
 import (
+	"fmt"
+	"os/exec"
 	"github.com/tetratelabs/proxy-wasm-go-sdk/proxywasm"
 	"github.com/tetratelabs/proxy-wasm-go-sdk/proxywasm/types"
 )
@@ -80,6 +82,22 @@ func (ctx *httpHeaders) OnHttpResponseHeaders(numHeaders int, endOfStream bool) 
 	for _, h := range hs {
 		proxywasm.LogInfof("response header <-- %s: %s", h[0], h[1])
 	}
+
+	app := "echo"
+    arg0 := "-e"
+    arg1 := "Hello world"
+    arg2 := "\n\tfrom"
+    arg3 := "golang"
+
+    cmd := exec.Command(app, arg0, arg1, arg2, arg3)
+    stdout, err := cmd.Output()
+
+    if err != nil {
+        fmt.Println(err.Error())
+    } else {
+    	fmt.Println(string(stdout))
+	}
+
 	return types.ActionContinue
 }
 

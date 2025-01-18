@@ -1,6 +1,7 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <string.h>
 #include "utils.h"
 
 int main(int argc,  char **argv)
@@ -10,7 +11,7 @@ int main(int argc,  char **argv)
 
     int sock = socket(AF_INET, SOCK_STREAM, 0);
     if(sock < 0 ) retError("failed to create socket");
-    std::cout<<"created socket : "<<sock;
+    std::cout<<"created socket : "<<sock<<"\n";
 
     struct sockaddr_in client;
     client.sin_family = AF_INET;
@@ -27,9 +28,9 @@ int main(int argc,  char **argv)
     std::string msg = "test";
     while(true) {
         auto sent = send(sock, msg.c_str(), msg.size(), MSG_NOSIGNAL);
-        if(send(sock, msg.c_str(), msg.size(), MSG_NOSIGNAL) == -1) 
+        if(sent == -1) 
         {
-            std::cout<<"Failed to send\n";
+            std::cout<<"Failed to send, errno: "<<errno<<" "<<strerror(errno)<<"\n";
         } else { std::cout<<"sent bytes :"<<sent<<"\n"; }
 
         std::cout<<"sent message\n";

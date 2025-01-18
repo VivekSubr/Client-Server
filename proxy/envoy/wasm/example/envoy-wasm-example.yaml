@@ -30,7 +30,7 @@ static_resources:
                       runtime: "envoy.wasm.runtime.v8"
                       code:
                         local:
-                          filename: "/home/vivek/example-filter.wasm"
+                          filename: "/home/vivek/Client-Server/proxy/envoy/wasm/dscp/proxy-wasm-cpp-sdk/dscp/example-filter.wasm"
                       allow_precompiled: true
               - name: envoy.filters.http.router #https://www.envoyproxy.io/docs/envoy/latest/configuration/http/http_filters/router_filter#config-http-filters-router
 

@@ -3,11 +3,11 @@ static_resources:
     - name: listener_0
       address:
         socket_address: { address: 0.0.0.0, port_value: 10000 }
-      socket_options: # Here we'll DSCP value to this listener
-        - level: 0        #  0 for IPPROTO_IP
-          name: 1         #  1 for IP_TOS
-          int_value: 64   #0x10 IPTOS_LOWDELAY  ==> 10000(00)=2^6=64  0x08 IPTOS_THROUGHPUT ==> 1000(00)=2^5=32
-          state: STATE_PREBIND  #STATE_PREBIND is default, other 2 values are STATE_BOUND, STATE_LISTENING
+      #socket_options: # Here we'll DSCP value to this listener
+      #  - level: 0        #  0 for IPPROTO_IP
+      #    name: 1         #  1 for IP_TOS
+      #    int_value: 64   #0x10 IPTOS_LOWDELAY  ==> 10000(00)=2^6=64  0x08 IPTOS_THROUGHPUT ==> 1000(00)=2^5=32
+      #    state: STATE_PREBIND  #STATE_PREBIND is default, other 2 values are STATE_BOUND, STATE_LISTENING
       filter_chains:
         - filters:
           - name: envoy.filters.network.http_connection_manager # https://www.envoyproxy.io/docs/envoy/latest/configuration/http/http_conn_man/http_conn_man#config-http-conn-man
@@ -48,7 +48,7 @@ static_resources:
         socket_options:
         - level: 0        
           name: 1         
-          int_value: 32   
+          int_value: 64   
           state: STATE_PREBIND  
       typed_extension_protocol_options:
         envoy.extensions.upstreams.http.v3.HttpProtocolOptions:
