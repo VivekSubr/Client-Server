@@ -15,7 +15,7 @@ func main() {
     portPtr     := flag.String("port", "3000", "port server listening to")
     crtPtr      := flag.String("crt", "../server/selfSigned.cert", "certificate")
     keyPtr      := flag.String("key", "../server/private.pem", "PEM encoded private key file.")
-    insecurePtr := flag.String("insecure", "true", "skip verifying cert chain")
+    insecurePtr := flag.String("insecure", "false", "skip verifying cert chain")
     caCrtPtr    := flag.String("caCrt", "", "ca cert")
 
     flag.Parse()
@@ -52,6 +52,7 @@ func main() {
         conf = &tls.Config{
             Certificates: []tls.Certificate{cert},
             InsecureSkipVerify: insecure,
+            MinVersion:   tls.VersionTLS12,
         }
     }
 

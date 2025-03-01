@@ -22,6 +22,7 @@ int retError(const std::string sError)
 std::unique_ptr<host> getHostFromArg(int argc, char** argv, int ipIndex, int portIndex)
 {
     if(argc < ipIndex || argc < portIndex) return nullptr;
+    std::cout<<"Connecting to "<<argv[ipIndex]<<":"<<argv[portIndex]<<"\n";
     return std::make_unique<host>(argv[ipIndex], std::atoi(argv[portIndex]));
 }
 

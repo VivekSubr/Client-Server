@@ -23,7 +23,6 @@ int main(int argc,  char **argv)
     std::cout<<"set dscp : "<<dscp<<"\n";
 
     if(connect(sock, (struct sockaddr*)&client, sizeof(client)) < 0) retError("failed to connect socket"); 
-    std::cout<<"connected to 127.0.0.1:3000\n";
     
     std::string msg = "test";
     while(true) {
