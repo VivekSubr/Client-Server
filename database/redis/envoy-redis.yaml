@@ -13,9 +13,9 @@ static_resources:
             typed_config:
               "@type": type.googleapis.com/envoy.extensions.filters.network.redis_proxy.v3.RedisProxy
               stat_prefix: redis_stats
+              custom_commands: ["example.parse"]
               settings:
                 op_timeout: 60s
-                custom_commands: ["udsf.setrec", "udsf.delrec", "udsf.lock", "udsf.getreclk", "udsf.setblk", "udsf.delblk", "udsf.setmeta", "udsf.updrec"]
               prefix_routes:
                 catch_all_route:
                   cluster: cluster_0 #everything to cluster_0
@@ -29,4 +29,4 @@ static_resources:
           - lb_endpoints:
               - endpoint:
                   address:
-                    socket_address: { address: 127.0.0.1, port_value: 1447 } 
+                    socket_address: { address: 127.0.0.1, port_value: 6379 } #default listening port

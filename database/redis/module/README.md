@@ -1,0 +1,1 @@
+Example redis module
