@@ -1,12 +1,12 @@
 #include <opentelemetry/exporters/otlp/otlp_grpc_exporter.h>
 #include <memory>
 #include <vector>
-#include "tracer.h"
 #include "opentelemetry/sdk/trace/simple_processor.h"
 #include "opentelemetry/sdk/trace/tracer_provider.h"
 #include "opentelemetry/trace/provider.h"
 #include "opentelemetry/trace/context.h"
 #include "opentelemetry/context/propagation/global_propagator.h"
+#include "tracer.h"
 
 //https://opentelemetry.io/docs/instrumentation/cpp/manual/
 
@@ -17,8 +17,8 @@ Tracer::Tracer(const std::string& app, const std::string& ver, TraceType t)
 {
   initTracer(app, ver, t);
   
-  ot_log::GlobalLogHandler::SetLogHandler(nostd::shared_ptr<CustomLogHandler>());
-  ot_log::GlobalLogHandler::SetLogLevel(ot_log::LogLevel::Debug);
+  //ot_log::GlobalLogHandler::SetLogHandler(nostd::shared_ptr<CustomLogHandler>());
+  //ot_log::GlobalLogHandler::SetLogLevel(ot_log::LogLevel::Debug);
 
   //propagation::GlobalTextMapPropagator::SetGlobalPropagator(nostd::shared_ptr<trace::propagation::JaegerPropagator>(new trace::propagation::JaegerPropagator()));
 }
@@ -28,7 +28,7 @@ Tracer::~Tracer()
   m_spanMap.clear();
   m_parentSpans.clear();
   m_activeScopes.clear();
-  std::static_pointer_cast<trace_sdk::TracerProvider>(m_trace_provider)->Shutdown();
+  //std::static_pointer_cast<trace_sdk::TracerProvider>(m_trace_provider)->Shutdown();
 }
 
 opentelemetry::sdk::resource::Resource Tracer::createResources()
@@ -59,13 +59,13 @@ void Tracer::initTracer(const std::string& app, const std::string& ver, TraceTyp
       auto processor = std::unique_ptr<trace_sdk::SpanProcessor>(new trace_sdk::SimpleSpanProcessor(std::move(exporter)));
       std::vector<std::unique_ptr<trace_sdk::SpanProcessor>> v; v.push_back(std::move(processor));
 
-      m_tracer_ctx = std::make_shared<trace_sdk::TracerContext>(
+      auto tracer_ctx = std::make_unique<trace_sdk::TracerContext>(
                               std::move(v), 
                               resource, 
                               std::move(always_on_sampler));
         
-      m_trace_provider =  std::shared_ptr<trace::TracerProvider>(new trace_sdk::TracerProvider(m_tracer_ctx));
-      m_tracer = m_trace_provider->GetTracer(app, ver);
+      auto trace_provider = std::shared_ptr<trace::TracerProvider>(new trace_sdk::TracerProvider(std::move(tracer_ctx)));
+      m_tracer = trace_provider->GetTracer(app, ver);
     } break;
 
     case Memory:
@@ -87,13 +87,13 @@ std::shared_ptr<memory::InMemorySpanData> Tracer::InitInMemoryTracer(const std::
   auto always_on_sampler = std::unique_ptr<trace_sdk::AlwaysOnSampler>(new trace_sdk::AlwaysOnSampler);
   auto processor = std::unique_ptr<trace_sdk::SpanProcessor>(new trace_sdk::SimpleSpanProcessor(std::move(exporter)));
   std::vector<std::unique_ptr<trace_sdk::SpanProcessor>> v; v.push_back(std::move(processor));
-  m_tracer_ctx = std::make_shared<trace_sdk::TracerContext>(
+  auto tracer_ctx = std::make_unique<trace_sdk::TracerContext>(
                               std::move(v), 
                               resource, 
                               std::move(always_on_sampler));
         
-  m_trace_provider = std::shared_ptr<trace::TracerProvider>(new trace_sdk::TracerProvider(m_tracer_ctx));
-  m_tracer = m_trace_provider->GetTracer(app, ver);
+  auto trace_provider = std::shared_ptr<trace::TracerProvider>(new trace_sdk::TracerProvider(std::move(tracer_ctx)));
+  m_tracer = trace_provider->GetTracer(app, ver);
   return span_data;
 }
 

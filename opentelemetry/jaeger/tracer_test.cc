@@ -1,7 +1,6 @@
 #include "trace_test.h"
 #include "sampler.h"
 #include "opentelemetry/context/propagation/global_propagator.h"
-#include "logger/logger.h"
 #include <fstream>
 
 #include "opentelemetry/sdk/trace/simple_processor.h"
@@ -35,20 +34,22 @@ TEST_F(TestTracer, Span)
     auto sampler = std::unique_ptr<CustomSampler>(new CustomSampler(0.1));
     auto processor = std::unique_ptr<trace_sdk::SpanProcessor>(new trace_sdk::SimpleSpanProcessor(std::move(exporter)));
     std::vector<std::unique_ptr<trace_sdk::SpanProcessor>> v; v.push_back(std::move(processor));
-    auto m_tracer_ctx = std::make_shared<trace_sdk::TracerContext>(
+    auto trace_ctx = std::make_unique<trace_sdk::TracerContext>(
                               std::move(v), 
                               resource, 
                               std::move(sampler));
         
-    auto m_trace_provider = std::shared_ptr<trace::TracerProvider>(new trace_sdk::TracerProvider(m_tracer_ctx));
-    auto m_tracer = m_trace_provider->GetTracer("TestTracer", "1.0.0");
+    auto trace_provider = std::shared_ptr<trace::TracerProvider>(new trace_sdk::TracerProvider(std::move(trace_ctx)));
+    auto tracer         = trace_provider->GetTracer("TestTracer", "1.0.0");
+    ASSERT_TRUE(tracer != nullptr);
+    ASSERT_TRUE(tracer.get() != nullptr);
 
     trace::StartSpanOptions options; 
     for(int i=0; i<10; i++)
     {
         std::ostringstream s;
         s << "span" << i;
-        auto span = m_tracer->StartSpan(s.str(), {}, {}, options);
+        auto span = tracer->StartSpan(s.str(), {}, {}, options);
         span->SetAttribute("ForceSampling", true);
         span->End();
     }

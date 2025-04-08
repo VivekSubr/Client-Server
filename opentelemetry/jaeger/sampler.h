@@ -1,5 +1,6 @@
 #pragma once
 #include <math.h>
+#include <tuple>
 #include "opentelemetry/sdk/trace/sampler.h"
 
 namespace trace_sdk  = opentelemetry::sdk::trace;
@@ -62,7 +63,7 @@ private:
         return (static_cast<uint64_t>(hi_bits) << 32) + static_cast<uint64_t>(lo_bits);
     }
 
-    uint64_t CalculateThresholdFromBuffer(const trace_api::TraceId &trace_id) noexcept
+    uint64_t CalculateThresholdFromBuffer(const opentelemetry::trace::TraceId &trace_id) noexcept
     {
         uint64_t res = 0;
         std::memcpy(&res, &trace_id, 8);
@@ -76,7 +77,7 @@ private:
         std::cout<<"***CheckIfForceSampling "<<attributes.size()<<"\n";
         return !attributes.ForEachKeyValue([](nostd::string_view key, opentelemetry::common::AttributeValue value) -> bool {
             std::cout<<"***ForEachKeyValue :"<<key<<"\n";
-            if(key == "ForceSampling" && absl::get<bool>(value) == true) return false;
+            //if(key == "ForceSampling" && std::get<bool>(value) == true) return false;
             
             return true;
         });

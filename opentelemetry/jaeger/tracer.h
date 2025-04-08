@@ -3,10 +3,10 @@
 #include <map>
 #include <iostream>
 #include "opentelemetry/sdk/trace/tracer.h"
+#include "opentelemetry/sdk/trace/tracer_provider.h"
 #include "opentelemetry/sdk/common/global_log_handler.h"
 #include "opentelemetry/ext/http/client/http_client.h"
 #include "opentelemetry/trace/propagation/http_trace_context.h"
-#include "logger/logger.h"
 #include "opentelemetry/exporters/memory/in_memory_span_exporter.h"
 
 namespace trace      = opentelemetry::trace;
@@ -22,8 +22,6 @@ enum TraceType {
 
 class CustomLogHandler : public opentelemetry::sdk::common::internal_log::LogHandler
 {
-  Logger m_logger = Logger("jaeger.log");
-
 public:
     void Handle(opentelemetry::sdk::common::internal_log::LogLevel level,
                 const char *file,
@@ -31,7 +29,7 @@ public:
                 const char *msg,
                 const opentelemetry::sdk::common::AttributeMap &attributes) noexcept override
     {
-      m_logger.Log(file, line, msg);
+      std::cout<<msg<<"\n";
     }
 };
 
@@ -122,9 +120,8 @@ class Tracer
                                                               std::unique_ptr<memory::InMemorySpanExporter> exporter);
   
  private:
-  nostd::shared_ptr<trace::Tracer>          m_tracer;
-  std::shared_ptr<trace_sdk::TracerContext> m_tracer_ctx;
-  std::shared_ptr<trace::TracerProvider>    m_trace_provider;
+  nostd::shared_ptr<trace::Tracer>           m_tracer;
+  //std::shared_ptr<trace_sdk::TracerProvider> m_trace_provider;
   std::unordered_map<TraceType, std::string> sTraceType = {
     {Otel_GRPC, "otel grpc"}, {Memory, "memory"}
   };

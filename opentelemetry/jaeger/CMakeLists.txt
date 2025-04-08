@@ -1,76 +1,87 @@
-cmake_minimum_required(VERSION 3.0.0)
-project(TracerExample VERSION 1.0.0)
+cmake_minimum_required(VERSION 3.16) 
+project(TracerExample VERSION 1.0.0) 
+include(ExternalProject) 
+include(FetchContent)
 
-find_package(CURL REQUIRED) 
-find_package(protobuf REQUIRED)
+set(CMAKE_POSITION_INDEPENDENT_CODE TRUE) 
+
+#installed abseil as absl in this dir
+#set(absl_DIR "/home/vivek/Client-Server/module/absl/lib/cmake/absl")
 find_package(absl REQUIRED)
-find_package(opentelemetry-cpp CONFIG REQUIRED)
-find_package(Boost 1.71 COMPONENTS log REQUIRED )
+find_package(Protobuf REQUIRED) #capital P!
+find_package(CURL REQUIRED) 
 
-set(Boost_USE_STATIC_LIBS OFF) 
-set(Boost_USE_MULTITHREADED ON)  
-set(Boost_USE_STATIC_RUNTIME OFF) 
-set(CMAKE_CXX_COMPILER "/usr/bin/g++-12")
+ExternalProject_Add(
+    opentelemetry-cpp 
+    GIT_REPOSITORY https://github.com/open-telemetry/opentelemetry-cpp.git 
+    GIT_TAG v1.18.0
+    CMAKE_ARGS 
+        -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/opentelemetry_install 
+        -DCMAKE_VERBOSE_MAKEFILE=ON 
+        -DCMAKE_POSITION_INDEPENDENT_CODE=ON 
+        -DCMAKE_CXX_STANDARD=17 
+        -DBUILD_SHARED_LIBS=ON 
+        -DWITH_ABSEIL=OFF 
+        -DWITH_STL=ON 
+        -DWITH_OTLP_HTTP=ON 
+        -DWITH_OTLP_GRPC=ON 
+        -DBUILD_TESTING=OFF 
+        -DWITH_PROMETHEUS=OFF 
+)
 
-include_directories( ${Boost_INCLUDE_DIRS} )
 include_directories(${CURL_INCLUDE_DIR})
-
-add_library(Tracer STATIC tracer.cc http.cc logger/logger.cc)
+add_library(Tracer STATIC tracer.cc http.cc) 
 add_executable(example example.cc)
 
-target_include_directories(Tracer PRIVATE ${OPENTELEMETRY_CPP_INCLUDE_DIRS})
-target_link_libraries(Tracer PRIVATE ${OPENTELEMETRY_CPP_LIBRARIES})
-target_link_libraries(Tracer PRIVATE ${Boost_LIBRARIES})
-target_link_libraries(example PRIVATE Tracer ${CURL_LIBRARIES})
-target_include_directories(example PRIVATE ${OPENTELEMETRY_CPP_INCLUDE_DIRS})
+set(LIB_PATH ${CMAKE_BINARY_DIR}/opentelemetry_install/lib)
+list(APPEND OTEL_LIB "libopentelemetry_resources.a libopentelemetry_common.a libopentelemetry_trace.a libopentelemetry_metrics.a")
+list(APPEND OTEL_LIB "libopentelemetry_exporter_in_memory.a libopentelemetry_exporter_ostream_span.a")
+list(APPEND OTEL_LIB "libopentelemetry_version.a libopentelemetry_exporter_otlp_grpc.a libopentelemetry_exporter_otlp_http.a")
 
-# Setup testing
-enable_testing()
-find_package(GTest REQUIRED)
+message("Linking otel ${OTEL_LIB}")
+message("OPENTELEMETRY_CPP_INCLUDE_DIRS=${OPENTELEMETRY_CPP_INCLUDE_DIRS}")
+message("OPENTELEMETRY_CPP_LIBRARIES=${OPENTELEMETRY_CPP_LIBRARIES}")
+target_include_directories(Tracer PUBLIC  ${CMAKE_BINARY_DIR}/opentelemetry_install/include) 
+target_link_libraries     (Tracer PUBLIC) 
+
+target_include_directories(example PRIVATE ${CMAKE_BINARY_DIR}/opentelemetry_install/include ${CURL_INCLUDE_DIR}) 
+target_link_directories   (example PRIVATE ${CMAKE_BINARY_DIR}/opentelemetry_install/lib)  
+target_link_libraries(example PRIVATE 
+        Tracer #Note that in linking order, this comes first
+        opentelemetry_resources opentelemetry_common opentelemetry_trace opentelemetry_metrics
+        opentelemetry_exporter_in_memory opentelemetry_exporter_ostream_span
+        opentelemetry_version opentelemetry_exporter_otlp_grpc opentelemetry_exporter_otlp_http
+        CURL::libcurl) 
+
+#Setup testing
+enable_testing() 
 include_directories(${GTEST_INCLUDE_DIR})
 
-# Add test cpp file
+#Add test cpp file
 add_executable(TracerTest tracer_test.cc)
-add_executable(LoggerTest logger/logger_test.cc)
 
-# Link test executable against gtest & gtest_main
-target_link_libraries(TracerTest ${GTEST_LIBRARY} ${GTEST_MAIN_LIBRARY} ${Boost_LIBRARIES})
-target_link_libraries(LoggerTest  ${GTEST_LIBRARY} ${GTEST_MAIN_LIBRARY} ${Boost_LIBRARIES})
+#Link test executable against gtest & gtest_main
+target_include_directories(TracerTest PRIVATE 
+                            ${CMAKE_BINARY_DIR}/opentelemetry_install/include                                                              
+                            ${GTEST_LIBRARY} 
+                            ${GTEST_MAIN_LIBRARY} ) 
+target_link_directories   (TracerTest PRIVATE ${CMAKE_BINARY_DIR}/opentelemetry_install/lib)  
 
-target_include_directories(TracerTest PRIVATE ${OPENTELEMETRY_CPP_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
-target_include_directories(LoggerTest PRIVATE ${OPENTELEMETRY_CPP_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
-
-add_test(
-    NAME TracerTest
-    COMMAND TracerTest
-)
-
-add_test(
-    NAME LoggerTest
-    COMMAND LoggerTest
-)
-
-target_link_libraries(
-    TracerTest
+target_link_libraries(TracerTest PRIVATE     
     gtest_main
     gtest
-    gmock
-    boost_log
-    pthread
+    gmock 
+    pthread 
     Tracer
+    opentelemetry_resources opentelemetry_common opentelemetry_trace opentelemetry_metrics
+    opentelemetry_exporter_in_memory opentelemetry_exporter_ostream_span
+    opentelemetry_version opentelemetry_exporter_otlp_grpc opentelemetry_exporter_otlp_http
 )
 
-target_link_libraries(
-    LoggerTest
-    gtest_main
-    gtest
-    gmock
-    boost_log
-    pthread
-)
+add_dependencies(Tracer     opentelemetry-cpp) 
+add_dependencies(TracerTest opentelemetry-cpp)
+add_dependencies(example    opentelemetry-cpp) 
 
-message(STATUS "CURL_INCLUDE_DIR=${CURL_INCLUDE_DIR}")
-message(STATUS "CURL_LIBRARIES=${CURL_LIBRARIES}")
-message(STATUS "OPENTELEMETRY_CPP_INCLUDE_DIRS=${OPENTELEMETRY_CPP_INCLUDE_DIRS}")
-message(STATUS "OPENTELEMETRY_CPP_LIBRARIES=${OPENTELEMETRY_CPP_LIBRARIES}")
-message(STATUS "GTEST_INCLUDE_DIR=${GTEST_INCLUDE_DIR}")
+add_test(
+    NAME TracerTest 
+    COMMAND TracerTest )
