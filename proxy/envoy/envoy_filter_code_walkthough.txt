@@ -1,0 +1,41 @@
+Envoy filter code walkthrough
+
+Filters are blocks of code which perform actions on dataflow between listeners and clusters. 
+
+Filter interface is defined here: 
+https://github.com/envoyproxy/envoy/blob/main/envoy/http/filter.h
+
+Filter Factory interface is defined here:
+https://github.com/envoyproxy/envoy/blob/main/envoy/http/filter_factory.h
+
+Envoy components define and use filter_factory apis to init filter chains. Filters register a factory implementation with their parent components using REGISTER_FACTORY macro
+defined at envoy/registry/registry.h
+
+For example, dynamic_modules does,
+REGISTER_FACTORY(DynamicModuleConfigFactory, NamedHttpFilterConfigFactory);
+REGISTER_FACTORY(UpstreamDynamicModuleConfigFactory, Server::Configuration::UpstreamHttpFilterConfigFactory);
+
+in register.cc,
+#define REGISTER_FACTORY(FACTORY, BASE)                                                            \
+  ABSL_ATTRIBUTE_UNUSED void forceRegister##FACTORY() {}                                           \
+  static Envoy::Registry::RegisterFactory</* NOLINT(fuchsia-statically-constructed-objects) */     \
+                                          FACTORY, BASE>                                           \
+      FACTORY##_registered
+	  
+/**
+ * Factory registration template. Enables users to register a particular implementation factory with
+ * the FactoryRegistry by instantiating this templated class with the specific factory class and the
+ * general Base class to which that factory conforms.
+ *
+ * Because factories are generally registered once and live for the length of the program, the
+ * standard use of this class is static instantiation within a linked implementation's translation
+ * unit. For an example of a typical use case, @see NamedNetworkFilterConfigFactory.
+*/
+
+The factory is registered as,  FactoryRegistry<Base>::registerFactory(instance_, instance_.name());
+Hence, here we call FactoryRegistry<NamedHttpFilterConfigFactory>::registerFactory to register DynamicModuleConfigFactory, which is an interface defined at envoy/server/filter_config.h
+
+
+
+
+

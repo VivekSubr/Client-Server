@@ -1,0 +1,22 @@
+Dynamic modules has two parts:
+
+* First, there's the code that loads the shared object, defines an ABI and SDKs for creating it
+https://github.com/envoyproxy/envoy/tree/main/source/extensions/dynamic_modules
+
+
+* Second, there's a generic 'dynamic_module' http filter defined that must be inserted into envoy's config yaml to be used, like:
+            http_filters:
+                - name: dscp_filter
+                  typed_config:
+                    "@type": type.googleapis.com/envoy.extensions.filters.http.dynamic_modules.v3.DynamicModuleFilter
+                    dynamic_module_config: # this will try to load ${ENVOY_DYNAMIC_MODULES_SEARCH_PATH}/lib${name}.so
+                      name: dscp_filter
+                    filter_name: dscp_filter
+
+
+This dynamic_module http filter is defined at source/common/extensions/filters/http/dynamic_modules, note that it derived from Http:StreamFilter.
+
+A dynamic module is created and loaded by createFilterFactoryFromProtoTyped in factory.cc, which is turn invoked by call of base class,
+source/extensions/filters/network/common/factory_base.h, by source/common/listener_manager/listener_manager_impl.cc         
+
+The factory is used to create filter
