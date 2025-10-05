@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: redis-daemonset
+  namespace: default
+  labels:
+    app: redis
+spec:
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+      - name: redis
+        image: redis:latest
+        ports:
+        - containerPort: 6379
+          name: redis
+          protocol: TCP
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "250m"
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        # Redis configuration
+        command: ["redis-server"]
+        args: ["--appendonly", "yes", "--save", "60", "1"]
+        # Volume mounts for persistence
+        volumeMounts:
+        - name: redis-data
+          mountPath: /data
+        # Health checks
+        livenessProbe:
+          tcpSocket:
+            port: 6379
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          exec:
+            command:
+            - redis-cli
+            - ping
+          initialDelaySeconds: 5
+          periodSeconds: 5
+      # Host network for better performance (optional)
+      # hostNetwork: true
+      # Volumes
+      volumes:
+      - name: redis-data
+        hostPath:
+          path: /var/lib/redis
+          type: DirectoryOrCreate
+      # Node selector (optional - uncomment to run only on specific nodes)
+      # nodeSelector:
+      #   redis: "true"
+      # Tolerations (optional - for running on master nodes)
+      tolerations:
+      - key: node-role.kubernetes.io/control-plane
+        operator: Exists
+        effect: NoSchedule

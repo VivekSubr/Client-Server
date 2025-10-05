@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: petstore-api
+  namespace: petstore
+  labels:
+    app: petstore-api
+    version: v1
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: petstore-api
+  template:
+    metadata:
+      labels:
+        app: petstore-api
+        version: v1
+    spec:
+      containers:
+      - name: petstore-api
+        image: petstore-api:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        env:
+        - name: SERVER_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: petstore-config
+              key: SERVER_PORT
+        - name: LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              name: petstore-config
+              key: LOG_LEVEL
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "100m"
+          limits:
+            memory: "128Mi"
+            cpu: "200m"
+        livenessProbe:
+          httpGet:
+            path: /store/inventory
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /store/inventory
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 2
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsNonRoot: true
+          runAsUser: 1000
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+      restartPolicy: Always
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000

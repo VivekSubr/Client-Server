@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: petstore-config
+  namespace: petstore
+  labels:
+    app: petstore-api
+data:
+  # Application configuration
+  SERVER_PORT: "8080"
+  LOG_LEVEL: "info"
+  # Add more configuration as needed

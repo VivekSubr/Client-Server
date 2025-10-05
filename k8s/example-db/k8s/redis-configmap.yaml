@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: redis-config
+  namespace: default
+data:
+  redis.conf: |
+    # Redis configuration file
+    bind 0.0.0.0
+    port 6379
+    
+    # Persistence
+    save 900 1
+    save 300 10
+    save 60 10000
+    
+    # AOF persistence
+    appendonly yes
+    appendfsync everysec
+    
+    # Memory management
+    maxmemory 100mb
+    maxmemory-policy allkeys-lru
+    
+    # Security (uncomment and set password)
+    # requirepass your_password_here
+    
+    # Logging
+    loglevel notice
+    
+    # Other settings
+    tcp-keepalive 300
+    timeout 0

@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: petstore-api-ingress
+  namespace: petstore
+  labels:
+    app: petstore-api
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: petstore-api.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: petstore-api-service
+            port:
+              number: 80
+  # Uncomment below for TLS
+  # tls:
+  # - hosts:
+  #   - petstore-api.local
+  #   secretName: petstore-tls
