@@ -38,7 +38,7 @@ func main() {
 	})
 
 	req, _ := http.NewRequest("POST", url, bytes.NewBuffer(postBody))
-    req.Header.Set("X-Custom-Header", "custom-header-test")
+    req.Header.Set("x-dscp", "62")
     req.Header.Set("Content-Type", "application/json")
 
 	fmt.Printf("sending to %q\n\n", url)
