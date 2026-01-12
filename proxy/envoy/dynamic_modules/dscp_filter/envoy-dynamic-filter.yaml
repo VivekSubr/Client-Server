@@ -39,6 +39,7 @@ static_resources:
   clusters:
     - name: cluster_0
       connect_timeout: 30s
+      max_requests_per_connection: 1  # Disable connection reuse - new connection per request, to test dscp
       load_assignment:
         cluster_name: cluster_0
         endpoints:
