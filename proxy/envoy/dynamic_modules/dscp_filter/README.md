@@ -9,4 +9,6 @@ then, setup traffic using,
 or use curl instead of client, 
     curl --http2-prior-knowledge -H "x-dscp: 46" http://127.0.0.1:10000/example
 
-tcpdump and check if envoy is setting dscp is response headers.
+
+Check tcpdump for if dscp is set,  sudo tcpdump -i lo -v 'port 1447'
+(Note, -i lo may not capture dscp packets!)

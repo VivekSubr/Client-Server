@@ -3,19 +3,8 @@ use envoy_proxy_dynamic_modules_rust_sdk::*;
 // Socket option constants for setting DSCP/TOS
 // IPPROTO_IP = 0, IP_TOS = 1 (for IPv4)
 // IPPROTO_IPV6 = 41, IPV6_TCLASS = 67 (for IPv6)
-const IPPROTO_IP: i32 = 0;
-const IP_TOS: i32 = 1;
-
-// FFI declaration for the socket option callback
-extern "C" {
-    fn envoy_dynamic_module_callback_http_set_socket_option(
-        filter_envoy_ptr: abi::envoy_dynamic_module_type_http_filter_envoy_ptr,
-        level: i32,
-        optname: i32,
-        optval: *const std::ffi::c_void,
-        optlen: usize,
-    ) -> bool;
-}
+const IPPROTO_IP: i64 = 0;
+const IP_TOS: i64 = 1;
 
 declare_init_functions!(init, new_http_filter_config_fn);
 
@@ -40,10 +29,10 @@ fn init() -> bool {
 ///
 /// Returns None if the filter name or config is determined to be invalid by each filter's `new` function.
 fn new_http_filter_config_fn<EC: EnvoyHttpFilterConfig, EHF: EnvoyHttpFilter>(
-    envoy_filter_config: &mut EC,
-    filter_name: &str,
+    _envoy_filter_config: &mut EC,
+    _filter_name: &str,
     filter_config: &[u8],
-) -> Option<Box<dyn HttpFilterConfig<EC, EHF>>> {
+) -> Option<Box<dyn HttpFilterConfig<EHF>>> {
     let filter_config = std::str::from_utf8(filter_config).unwrap();
     Some(Box::new(FilterConfig::new(filter_config)))
 }
@@ -67,54 +56,73 @@ impl FilterConfig {
     }
 }
 
-impl<EC: EnvoyHttpFilterConfig, EHF: EnvoyHttpFilter> HttpFilterConfig<EC, EHF> for FilterConfig {
+impl<EHF: EnvoyHttpFilter> HttpFilterConfig<EHF> for FilterConfig {
     /// This is called for each new HTTP filter.
-    fn new_http_filter(&mut self, _envoy_config: &mut EC) -> Box<dyn HttpFilter<EHF>> {
+    fn new_http_filter(&self, _envoy: &mut EHF) -> Box<dyn HttpFilter<EHF>> {
         Box::new(Filter::new())
     }
 }
 
 /// This implements the [`envoy_proxy_dynamic_modules_rust_sdk::HttpFilter`] trait.
 ///
-/// This filter reads the 'x-dscp' header from client requests and sets it in the response.
+/// This filter reads the 'x-dscp' header from client requests and sets the DSCP/TOS
+/// socket option on the upstream connection. It also reads 'x-dscp' from server
+/// responses and sets DSCP on the downstream socket for responses back to the client.
 pub struct Filter {
-    /// Stores the DSCP value from the request header
-    dscp_value: Option<Vec<u8>>,
+    /// Stores the DSCP value from the request header (for upstream)
+    request_dscp_value: Option<Vec<u8>>,
+    /// Stores the DSCP value from the response header (for downstream)
+    response_dscp_value: Option<Vec<u8>>,
 }
 
 impl Filter {
     pub fn new() -> Self {
         Self {
-            dscp_value: None,
+            request_dscp_value: None,
+            response_dscp_value: None,
         }
     }
 
-    /// Set the DSCP/TOS value on the downstream socket
-    /// DSCP values are typically 0-63, but the TOS field is 8 bits where DSCP is the upper 6 bits
-    /// So DSCP value needs to be shifted left by 2: TOS = DSCP << 2
-    /// 
-    /// Safety: envoy_filter must be a valid EnvoyHttpFilterImpl which has raw_ptr as its first field
-    unsafe fn set_socket_dscp<EHF: EnvoyHttpFilter>(envoy_filter: &mut EHF, dscp_value: u8) -> bool {
-        // EnvoyHttpFilterImpl is a repr(Rust) struct with raw_ptr as its only field
-        // We can safely read the first field by treating the reference as a pointer to the raw_ptr
-        let ptr: abi::envoy_dynamic_module_type_http_filter_envoy_ptr = 
-            *(envoy_filter as *mut EHF as *mut abi::envoy_dynamic_module_type_http_filter_envoy_ptr);
-        
-        // TOS byte = DSCP (6 bits) << 2 | ECN (2 bits, typically 0)
-        let tos_value: i32 = (dscp_value as i32) << 2;
-        let result = envoy_dynamic_module_callback_http_set_socket_option(
-            ptr,
-            IPPROTO_IP,
-            IP_TOS,
-            &tos_value as *const i32 as *const std::ffi::c_void,
-            std::mem::size_of::<i32>(),
-        );
-        if result {
-            println!("Successfully set socket IP_TOS to {} (DSCP {})", tos_value, dscp_value);
-        } else {
-            eprintln!("Failed to set socket IP_TOS");
+    /// Helper function to parse DSCP value and set socket option
+    fn set_dscp_socket_option<EHF: EnvoyHttpFilter>(
+        envoy_filter: &mut EHF,
+        dscp_bytes: &[u8],
+        state: abi::envoy_dynamic_module_type_socket_option_state,
+        direction: abi::envoy_dynamic_module_type_socket_direction,
+        direction_label: &str,
+    ) -> bool {
+        if let Ok(dscp_str) = std::str::from_utf8(dscp_bytes) {
+            if let Ok(dscp_num) = dscp_str.trim().parse::<u8>() {
+                if dscp_num <= 63 {
+                    // DSCP is 6 bits, max value 63
+                    // TOS byte = DSCP (6 bits) << 2 | ECN (2 bits, typically 0)
+                    let tos_value: i64 = (dscp_num as i64) << 2;
+
+                    let result = envoy_filter.set_socket_option_int(
+                        IPPROTO_IP,
+                        IP_TOS,
+                        state,
+                        direction,
+                        tos_value,
+                    );
+
+                    if result {
+                        println!(
+                            "[{}] Successfully set socket IP_TOS to {} (DSCP {})",
+                            direction_label, tos_value, dscp_num
+                        );
+                        return true;
+                    } else {
+                        eprintln!("[{}] Failed to set socket IP_TOS", direction_label);
+                    }
+                } else {
+                    eprintln!("[{}] DSCP value {} out of range (0-63)", direction_label, dscp_num);
+                }
+            } else {
+                eprintln!("[{}] Failed to parse DSCP value: {}", direction_label, dscp_str);
+            }
         }
-        result
+        false
     }
 }
 
@@ -127,17 +135,28 @@ impl<EHF: EnvoyHttpFilter> HttpFilter<EHF> for Filter {
         envoy_filter: &mut EHF,
         _end_of_stream: bool,
     ) -> abi::envoy_dynamic_module_type_on_http_filter_request_headers_status {
-        // Read the 'x-dscp' header from the client request
+        // Read the 'x-dscp' header from the client request and set socket option immediately
+        // Socket options must be set BEFORE the upstream connection is created
         if let Some(dscp_buffer) = envoy_filter.get_request_header_value("x-dscp") {
             let dscp_bytes = dscp_buffer.as_slice().to_vec();
             println!(
-                "Received x-dscp header from request: {}",
+                "[Request] Received x-dscp header: {}",
                 String::from_utf8_lossy(&dscp_bytes)
             );
-            self.dscp_value = Some(dscp_bytes);
+
+            // Set DSCP on upstream socket using Prebind state
+            Self::set_dscp_socket_option(
+                envoy_filter,
+                &dscp_bytes,
+                abi::envoy_dynamic_module_type_socket_option_state::Prebind,
+                abi::envoy_dynamic_module_type_socket_direction::Upstream,
+                "Upstream",
+            );
+
+            self.request_dscp_value = Some(dscp_bytes);
         } else {
-            println!("No x-dscp header found in request");
-            self.dscp_value = None;
+            println!("[Request] No x-dscp header found");
+            self.request_dscp_value = None;
         }
 
         abi::envoy_dynamic_module_type_on_http_filter_request_headers_status::Continue
@@ -145,49 +164,36 @@ impl<EHF: EnvoyHttpFilter> HttpFilter<EHF> for Filter {
 
     fn on_response_headers(
         &mut self,
-        envoy: &mut EHF,
+        envoy_filter: &mut EHF,
         _end_stream: bool,
     ) -> abi::envoy_dynamic_module_type_on_http_filter_response_headers_status {
-        // Set the x-dscp value from the request into the response header and socket
-        if let Some(ref dscp_value) = self.dscp_value {
-            // Set the response header
-            let success = envoy.set_response_header("x-dscp", dscp_value);
-            if success {
-                println!(
-                    "Set x-dscp response header to: {}",
-                    String::from_utf8_lossy(dscp_value)
-                );
-            } else {
-                eprintln!("Failed to set x-dscp response header");
-            }
+        // Check if server sent x-dscp header in response
+        if let Some(dscp_buffer) = envoy_filter.get_response_header_value("x-dscp") {
+            let dscp_bytes = dscp_buffer.as_slice().to_vec();
+            println!(
+                "[Response] Received x-dscp header from server: {}",
+                String::from_utf8_lossy(&dscp_bytes)
+            );
 
-            // Parse DSCP value and set on socket
-            if let Ok(dscp_str) = std::str::from_utf8(dscp_value) {
-                if let Ok(dscp_num) = dscp_str.trim().parse::<u8>() {
-                    if dscp_num <= 63 {
-                        // DSCP is 6 bits, max value 63
-                        unsafe {
-                            Self::set_socket_dscp(envoy, dscp_num);
-                        }
-                    } else {
-                        eprintln!("DSCP value {} out of range (0-63)", dscp_num);
-                    }
-                } else {
-                    eprintln!("Failed to parse DSCP value: {}", dscp_str);
-                }
-            }
+            // Set DSCP on downstream socket (for response to client)
+            // Use Bound state since the downstream connection is already established
+            Self::set_dscp_socket_option(
+                envoy_filter,
+                &dscp_bytes,
+                abi::envoy_dynamic_module_type_socket_option_state::Bound,
+                abi::envoy_dynamic_module_type_socket_direction::Downstream,
+                "Downstream",
+            );
+
+            self.response_dscp_value = Some(dscp_bytes);
         } else {
-            // No DSCP value from request, set a default or skip
-            let success = envoy.set_response_header("x-dscp", b"not-specified");
-            if !success {
-                eprintln!("Failed to set default x-dscp response header");
+            // Log if request had DSCP but response doesn't
+            if let Some(ref req_dscp) = self.request_dscp_value {
+                println!(
+                    "[Response] No x-dscp from server (request had DSCP: {})",
+                    String::from_utf8_lossy(req_dscp)
+                );
             }
-        }
-
-        // Add a marker header to indicate the filter processed the request
-        let success = envoy.set_response_header("x-dscp-filter", b"processed");
-        if !success {
-            eprintln!("Failed to set x-dscp-filter response header");
         }
 
         abi::envoy_dynamic_module_type_on_http_filter_response_headers_status::Continue
@@ -199,8 +205,8 @@ mod tests {
     use super::*;
 
     #[test]
-    /// Test filter captures x-dscp header from request
-    fn test_filter_captures_dscp_header() {
+    /// Test filter captures x-dscp header from request and sets upstream DSCP
+    fn test_filter_captures_request_dscp_header() {
         let mut envoy_filter = envoy_proxy_dynamic_modules_rust_sdk::MockEnvoyHttpFilter::new();
 
         // Mock getting the x-dscp request header
@@ -210,8 +216,14 @@ mod tests {
             .times(1)
             .returning(|_| {
                 // Return a mock buffer with DSCP value "46"
-                Some(envoy_proxy_dynamic_modules_rust_sdk::EnvoyBuffer::new(b"46"))
+                Some(envoy_proxy_dynamic_modules_rust_sdk::EnvoyBuffer::new("46"))
             });
+
+        // Mock set_socket_option_int call for upstream
+        envoy_filter
+            .expect_set_socket_option_int()
+            .times(1)
+            .returning(|_, _, _, _, _| true);
 
         let mut filter = Filter::new();
 
@@ -222,12 +234,12 @@ mod tests {
         );
 
         // Verify the DSCP value was stored
-        assert_eq!(filter.dscp_value, Some(b"46".to_vec()));
+        assert_eq!(filter.request_dscp_value, Some(b"46".to_vec()));
     }
 
     #[test]
-    /// Test filter handles missing x-dscp header
-    fn test_filter_without_dscp_header() {
+    /// Test filter handles missing x-dscp header in request
+    fn test_filter_without_request_dscp_header() {
         let mut envoy_filter = envoy_proxy_dynamic_modules_rust_sdk::MockEnvoyHttpFilter::new();
 
         // Mock getting the x-dscp request header - returns None
@@ -246,6 +258,63 @@ mod tests {
         );
 
         // Verify no DSCP value was stored
-        assert_eq!(filter.dscp_value, None);
+        assert_eq!(filter.request_dscp_value, None);
+    }
+
+    #[test]
+    /// Test filter captures x-dscp header from response and sets downstream DSCP
+    fn test_filter_captures_response_dscp_header() {
+        let mut envoy_filter = envoy_proxy_dynamic_modules_rust_sdk::MockEnvoyHttpFilter::new();
+
+        // Mock getting the x-dscp response header
+        envoy_filter
+            .expect_get_response_header_value()
+            .withf(|key| key == "x-dscp")
+            .times(1)
+            .returning(|_| {
+                // Return a mock buffer with DSCP value "34"
+                Some(envoy_proxy_dynamic_modules_rust_sdk::EnvoyBuffer::new("34"))
+            });
+
+        // Mock set_socket_option_int call for downstream
+        envoy_filter
+            .expect_set_socket_option_int()
+            .times(1)
+            .returning(|_, _, _, _, _| true);
+
+        let mut filter = Filter::new();
+
+        // Process response headers - should capture x-dscp from server
+        assert_eq!(
+            filter.on_response_headers(&mut envoy_filter, false),
+            abi::envoy_dynamic_module_type_on_http_filter_response_headers_status::Continue
+        );
+
+        // Verify the response DSCP value was stored
+        assert_eq!(filter.response_dscp_value, Some(b"34".to_vec()));
+    }
+
+    #[test]
+    /// Test filter handles missing x-dscp header in response
+    fn test_filter_without_response_dscp_header() {
+        let mut envoy_filter = envoy_proxy_dynamic_modules_rust_sdk::MockEnvoyHttpFilter::new();
+
+        // Mock getting the x-dscp response header - returns None
+        envoy_filter
+            .expect_get_response_header_value()
+            .withf(|key| key == "x-dscp")
+            .times(1)
+            .returning(|_| None);
+
+        let mut filter = Filter::new();
+
+        // Process response headers - no x-dscp present
+        assert_eq!(
+            filter.on_response_headers(&mut envoy_filter, false),
+            abi::envoy_dynamic_module_type_on_http_filter_response_headers_status::Continue
+        );
+
+        // Verify no response DSCP value was stored
+        assert_eq!(filter.response_dscp_value, None);
     }
 }

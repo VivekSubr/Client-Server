@@ -16,6 +16,7 @@ func main() {
 
 	h2s := &http2.Server{}
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("x-dscp", "34")
 		fmt.Print("Replied\n")
 		fmt.Fprintf(w, "Hello, %v, http: %v\n", r.URL.Path, r.TLS == nil)
 	})
