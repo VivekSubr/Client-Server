@@ -11,3 +11,13 @@ openssl x509 -in ca-crt -noout -subject
 subject=C = US, ST = Denial, L = Springfield, O = Dis, CN = litest.com
 
 Hence it is own ca cert: openssl verify -CAfile ca-crt ca-crt
+
+
+* TRUST STORE
+A file and/or directory containing trusted CA certificates (root and sometimes intermediate CAs) that OpenSSL consults during certificate verification
+
+We can use ubuntu's own trust store for now, putting your own self signed cert into it
+    sudo apt-get install -y ca-certificates
+    sudo cp my-ca.crt /usr/local/share/ca-certificates/
+    sudo update-ca-certificates
+
