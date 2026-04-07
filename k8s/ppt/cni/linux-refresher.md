@@ -119,3 +119,72 @@ Bridges are lower level and hence has to go deeper - redirection is to MAC table
 A network namespace is an isolated copy of the network stack. Each namespace has its own.
 
 # IpTables
+```
+[root@subramaniamv-tk5-k8-node-1-o0dp7x-zy8li9n3p2ggrqg4 ~]# ip netns list
+cni-9452c888-9079-1c86-2460-8ab02f1139a0 (id: 9)
+cni-e2ca6c00-ab31-3d4a-ebbb-89cffc82b275 (id: 8)
+cni-53a3733b-2935-5f92-029d-68330ad77d6d (id: 7)
+cni-d7fda231-098f-6d65-6bc6-3492bbd50cca (id: 6)
+cni-484b767d-70c4-5bbc-255a-3b2b42b184be (id: 5)
+cni-c2384efe-b074-da12-ac0d-01257dabfc23 (id: 4)
+cni-79f36a47-22e3-07f0-f596-a3ae891c5b7e (id: 3)
+cni-010609df-2c22-e5a3-4991-a0499307319e (id: 2)
+cni-5f54b7b4-015d-66ff-95b3-19b432554559 (id: 1)
+cni-1dc36750-ab34-884c-5262-84180ae79d34 (id: 0)
+```
+
+These netns were created by calico to wire up pods to the veth interfaces. Each cni-* namespace has its own full network stack:
+
+    lo (loopback)
+    eth0 (pod interface)
+    Pod IP
+    Routing table
+    iptables rules
+    Ports & sockets
+
+```
+[root@subramaniamv-tk5-k8-node-1-o0dp7x-zy8li9n3p2ggrqg4 ~]# ip netns exec cni-1dc36750-ab34-884c-5262-84180ae79d34 ip link
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN mode DEFAULT group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+2: eth0@if8: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP mode DEFAULT group default qlen 1000
+    link/ether fe:cc:aa:af:f1:4a brd ff:ff:ff:ff:ff:ff link-netnsid 0
+3: tunl0@NONE: <NOARP> mtu 1480 qdisc noop state DOWN mode DEFAULT group default qlen 1000
+    link/ipip 0.0.0.0 brd 0.0.0.0
+```
+
+Here, eth0@if8 is the important part it means - “eth0 is one end of a veth pair, and the other end has interface index 8 in another namespace.”
+
+So, from output of 'ip link show', eth0 in pod maps to 'cali344ea0df667@if2' veth interface.
+
+```
+8: cali344ea0df667@if2: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP mode DEFAULT group default qlen 1000
+    link/ether ee:ee:ee:ee:ee:ee brd ff:ff:ff:ff:ff:ff link-netns cni-1dc36750-ab34-884c-5262-84180ae79d34
+```
+
+All calico veth interfaces link to calico's tunnel interface, tunl0
+
+```
+3: tunl0@NONE: <NOARP> mtu 1480 qdisc noop state DOWN mode DEFAULT group default qlen 1000
+    link/ipip 0.0.0.0 brd 0.0.0.0
+```
+
+Note the @NONE --> it means this tunnel is not linked to any other interface, it sends to actual NIC.
+
+[ Pod ]
+  eth0
+   │   (veth)
+   ▼
+[ Node ]
+  cali344ea0df667
+   │
+   │  (routing lookup)
+   │
+   ├─ if destination pod is LOCAL:
+   │      → another cali* interface
+   │
+   └─ if destination pod is REMOTE:
+          → tunl0
+              (IP-in-IP encapsulation)
+              ↓
+           ens3 (physical NIC)
+

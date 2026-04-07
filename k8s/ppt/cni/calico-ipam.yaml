@@ -1,0 +1,425 @@
+apiVersion: crd.projectcalico.org/v1
+kind: IPAMBlock
+metadata:
+  annotations:
+    projectcalico.org/metadata: '{"creationTimestamp":null}'
+  creationTimestamp: "2026-04-07T07:10:19Z"
+  generation: 96
+  name: 192-168-41-64-26
+  resourceVersion: "52724"
+  uid: a71929ac-f46b-4ac9-a19d-1e31ddc56102
+spec:
+  affinity: host:subramaniamv-tk5-k8-node-2-o0dp7x-zy8li9n3p2ggrqg4
+  allocations:
+  - 0
+  - 1
+  - 2
+  - 3
+  - 4
+  - null
+  - 5
+  - null
+  - 6
+  - 7
+  - null
+  - 8
+  - null
+  - null
+  - null
+  - 9
+  - 10
+  - null
+  - 11
+  - 12
+  - null
+  - null
+  - 13
+  - 14
+  - 15
+  - 16
+  - 17
+  - 18
+  - 19
+  - 20
+  - 21
+  - 22
+  - null
+  - 23
+  - null
+  - null
+  - 24
+  - null
+  - 25
+  - null
+  - null
+  - 26
+  - 27
+  - null
+  - 28
+  - 29
+  - 30
+  - 31
+  - 32
+  - null
+  - null
+  - 33
+  - 34
+  - null
+  - 35
+  - 36
+  - 37
+  - 38
+  - 39
+  - 40
+  - null
+  - 41
+  - 42
+  - null
+  attributes:
+  - handle_id: ipip-tunnel-addr-subramaniamv-tk5-k8-node-2-o0dp7x-zy8li9n3p2ggrqg4
+    secondary:
+      node: subramaniamv-tk5-k8-node-2-o0dp7x-zy8li9n3p2ggrqg4
+      type: ipipTunnelAddress
+  - handle_id: k8s-pod-network.f75ee8c8d4c3ddf9b4a31cfd2fe5afd03778c03218b8ea68df73efe14c5b5edf
+    secondary:
+      namespace: kube-system
+      node: subramaniamv-tk5-k8-node-2-o0dp7x-zy8li9n3p2ggrqg4
+      pod: coredns-7b99cc6d96-5bkg4
+      timestamp: 2026-04-07 07:10:47.331581835 +0000 UTC
+  - handle_id: k8s-pod-network.360f270975afeb9d918d81d0a40cdfe683732cbb121ed8d07b18054bed2cce3e
+    secondary:
+      namespace: kube-system
+      node: subramaniamv-tk5-k8-node-2-o0dp7x-zy8li9n3p2ggrqg4
+      pod: coredns-7b99cc6d96-wsr46
+      timestamp: 2026-04-07 07:10:47.358133984 +0000 UTC
+  - handle_id: k8s-pod-network.4714c4bd93348f820cf53b03f59ef6a44b142b677157170b479c79719ffff4cf
+    secondary:
+      namespace: fed-kube-addons
+      node: subramaniamv-tk5-k8-node-2-o0dp7x-zy8li9n3p2ggrqg4
+      pod: cert-exporter-k8s-secret-67dbd4989b-h2rfg
+      timestamp: 2026-04-07 07:47:56.687639619 +0000 UTC
+  - handle_id: k8s-pod-network.53abbe626425436ffe3d8f3ffa501a0a24fbf43a387fc19df84aefb83962e0fa
+    secondary:
+      namespace: fed-kube-addons
+      node: subramaniamv-tk5-k8-node-2-o0dp7x-zy8li9n3p2ggrqg4
+      pod: cert-exporter-worker-ds-5j5jh
+      timestamp: 2026-04-07 07:47:56.777834532 +0000 UTC
+  - handle_id: k8s-pod-network.c4e89b050b860c7d6d40b3707636cfa560aa55aae0052e90dd587f02460defbe
+    secondary:
+      namespace: fed-kube-addons
+      node: subramaniamv-tk5-k8-node-2-o0dp7x-zy8li9n3p2ggrqg4
+      pod: pccat-pchist-5dbd44f789-htrsb
+      timestamp: 2026-04-07 07:48:08.431157476 +0000 UTC
+  - handle_id: k8s-pod-network.37c442bac8e5921fc7a9623f0b8333c3d3d806962824c558f252a771fe2ce849
+    secondary:
+      namespace: fed-opa
+      node: subramaniamv-tk5-k8-node-2-o0dp7x-zy8li9n3p2ggrqg4
+      pod: gatekeeper-audit-6fd9448444-w4fkd
+      timestamp: 2026-04-07 07:48:53.261671079 +0000 UTC
+  - handle_id: k8s-pod-network.87242d35266d4a1c7a6e61b5b023602341c5753c00d586cb832c90e4bb83a130
+    secondary:
+      namespace: fed-opa
+      node: subramaniamv-tk5-k8-node-2-o0dp7x-zy8li9n3p2ggrqg4
+      pod: gatekeeper-controller-manager-84544c99d-wtjlq
+      timestamp: 2026-04-07 07:48:53.272778958 +0000 UTC
+  - handle_id: k8s-pod-network.dc9f64d2b471b8273f92085f26499367c9d9c4a624592ac63ca3c064397e2cae
+    secondary:
+      namespace: fed-opa
+      node: subramaniamv-tk5-k8-node-2-o0dp7x-zy8li9n3p2ggrqg4
+      pod: opa-6fcbccb46f-vrhj9
+      timestamp: 2026-04-07 07:48:54.832299812 +0000 UTC
+  - handle_id: k8s-pod-network.fb33ad5d277b7c9dd595e01702dafa90039f1d66d081757fff36e2bd765bb9de
+    secondary:
+      namespace: fed-istio
+      node: subramaniamv-tk5-k8-node-2-o0dp7x-zy8li9n3p2ggrqg4
+      pod: istiod-7764f8fbb4-lv87w
+      timestamp: 2026-04-07 07:50:46.56545802 +0000 UTC
+  - handle_id: k8s-pod-network.f4d16ea04dac8ea700d94ae76f2883bddf6414481e792f783209275850253ec9
+    secondary:
+      namespace: fed-istio
+      node: subramaniamv-tk5-k8-node-2-o0dp7x-zy8li9n3p2ggrqg4
+      pod: istio-cni-node-ppjss
+      timestamp: 2026-04-07 07:50:54.738461762 +0000 UTC
+  - handle_id: k8s-pod-network.e424dd528d2349e2270779681e0438a6429404662b0768b01aa93232de164a97
+    secondary:
+      namespace: fed-istio-control-plane
+      node: subramaniamv-tk5-k8-node-2-o0dp7x-zy8li9n3p2ggrqg4
+      pod: istio-cni-node-wf9q5
+      timestamp: 2026-04-07 07:51:41.039087948 +0000 UTC
+  - handle_id: k8s-pod-network.80413cd468b6dc952c6405bc6dbbd516b444044542fa2d5a86fe236240cc5676
+    secondary:
+      namespace: fed-istio-control-plane
+      node: subramaniamv-tk5-k8-node-2-o0dp7x-zy8li9n3p2ggrqg4
+      pod: istiod-istio-d79b8f5d6-9fk5h
+      timestamp: 2026-04-07 07:51:41.433234066 +0000 UTC
+  - handle_id: k8s-pod-network.c4162e10cb6f6ea7c990bd03486e16bf1766d42458f06d82650d93bda77f9d09
+    secondary:
+      namespace: fed-paas-helpers
+      node: subramaniamv-tk5-k8-node-2-o0dp7x-zy8li9n3p2ggrqg4
+      pod: fed-paas-helpers-pod-cert-manager-cainjector-66d784c5b6-7hc64
+      timestamp: 2026-04-07 07:52:34.865007928 +0000 UTC
+  - handle_id: k8s-pod-network.dbe02bd62c63804a7d9c9993db9de258a289db3c0a359bf4296c0e57320091cd
+    secondary:
+      namespace: fed-paas-helpers
+      node: subramaniamv-tk5-k8-node-2-o0dp7x-zy8li9n3p2ggrqg4
+      pod: istio-config-controller-b789f8985-jvtqw
+      timestamp: 2026-04-07 07:52:35.175800358 +0000 UTC
+  - handle_id: k8s-pod-network.a1a5a085cabe54277bf3eb9fb23a0deadc3025da94f0d93766171cdcd48ef667
+    secondary:
+      namespace: fed-paas-helpers
+      node: subramaniamv-tk5-k8-node-2-o0dp7x-zy8li9n3p2ggrqg4
+      pod: local-path-provisioner-5b7dc84fdb-hwn55
+      timestamp: 2026-04-07 07:52:35.462337449 +0000 UTC
+  - handle_id: k8s-pod-network.932fadcfa044f6fed3c5815cbddb182c70f1e8cff4e2b3f8df71236f3b04f5fd
+    secondary:
+      namespace: fed-paas-helpers
+      node: subramaniamv-tk5-k8-node-2-o0dp7x-zy8li9n3p2ggrqg4
+      pod: fed-paas-helpers-pod-cert-manager-66fc4786cb-xrg2z
+      timestamp: 2026-04-07 07:52:35.774228199 +0000 UTC
+  - handle_id: k8s-pod-network.474d07510ab07865831d1a9a92c2b9502a7857e2507d4dbf6de5de65141476ac
+    secondary:
+      namespace: fed-paas-helpers
+      node: subramaniamv-tk5-k8-node-2-o0dp7x-zy8li9n3p2ggrqg4
+      pod: udsf-mgmt-op-7bb6c4f5dc-98c5q
+      timestamp: 2026-04-07 07:52:36.421930538 +0000 UTC
+  - handle_id: k8s-pod-network.1dba26ed8652e8887875d902cf7ac14964584f441ed21bedc5c0099a3edb1d02
+    secondary:
+      namespace: fed-paas-helpers
+      node: subramaniamv-tk5-k8-node-2-o0dp7x-zy8li9n3p2ggrqg4
+      pod: fluentd-operator-mjsc4
+      timestamp: 2026-04-07 07:52:36.568890077 +0000 UTC
+  - handle_id: k8s-pod-network.ad02e05fa8e819c1a2e083ad140ac1390d026ff67dfc1ac4db531c949cc7c2fe
+    secondary:
+      namespace: fed-paas-helpers
+      node: subramaniamv-tk5-k8-node-2-o0dp7x-zy8li9n3p2ggrqg4
+      pod: fed-paas-helpers-pod-cert-manager-webhook-68f458cbc4-9tbtj
+      timestamp: 2026-04-07 07:52:36.807674236 +0000 UTC
+  - handle_id: k8s-pod-network.a6231c57f76671379523dd8df761ed555fde6ca186284ad7bf9e1447818f451e
+    secondary:
+      namespace: fed-paas-helpers
+      node: subramaniamv-tk5-k8-node-2-o0dp7x-zy8li9n3p2ggrqg4
+      pod: etcd-monitor-65f8576598-zbsk5
+      timestamp: 2026-04-07 07:52:37.058086278 +0000 UTC
+  - handle_id: k8s-pod-network.74cb4d1c9e273bfd237985cb1dcab9e676284a5fb8bf39b42f0402467cb2b970
+    secondary:
+      namespace: fed-paas-helpers
+      node: subramaniamv-tk5-k8-node-2-o0dp7x-zy8li9n3p2ggrqg4
+      pod: capture-manager-9444d7577-vpq89
+      timestamp: 2026-04-07 07:52:37.369387152 +0000 UTC
+  - handle_id: k8s-pod-network.1f86230c4a4ce61e193b909274756dc8ad41cbea7234254482b220b44d408872
+    secondary:
+      namespace: fed-paas-helpers
+      node: subramaniamv-tk5-k8-node-2-o0dp7x-zy8li9n3p2ggrqg4
+      pod: cores-mgr-ds-sldlh
+      timestamp: 2026-04-07 07:52:37.381493205 +0000 UTC
+  - handle_id: k8s-pod-network.0182813ef0f74bcc7d3b789c0a03e2842d19fffc96aa05d513a04a8ee51149c9
+    secondary:
+      namespace: fed-db-etcd
+      node: subramaniamv-tk5-k8-node-2-o0dp7x-zy8li9n3p2ggrqg4
+      pod: etcd-operator-6f4ff6b6d5-6c6dm
+      timestamp: 2026-04-07 07:54:44.061747943 +0000 UTC
+  - handle_id: k8s-pod-network.626134e12949e4ac33279c9ae9f195ea787653c3018153dbda0444c89afffd4c
+    secondary:
+      namespace: fed-otel-operator
+      node: subramaniamv-tk5-k8-node-2-o0dp7x-zy8li9n3p2ggrqg4
+      pod: opentelemetry-operator-controller-manager-6cb889cdb4-x5t4l
+      timestamp: 2026-04-07 07:55:26.528671933 +0000 UTC
+  - handle_id: k8s-pod-network.f34733cdb75596f817b08932be668982915887a57ac1a74a82ae55e93dfaba51
+    secondary:
+      namespace: fed-redis-operator
+      node: subramaniamv-tk5-k8-node-2-o0dp7x-zy8li9n3p2ggrqg4
+      pod: operator-for-redis-56578fb6f-t4m4k
+      timestamp: 2026-04-07 07:55:48.191423372 +0000 UTC
+  - handle_id: k8s-pod-network.d1a92442cab102ee5760fec26a2925ef246cf55e34093060d993a92d5123e1a3
+    secondary:
+      namespace: fed-grafana
+      node: subramaniamv-tk5-k8-node-2-o0dp7x-zy8li9n3p2ggrqg4
+      pod: grafana-5599846bc6-qvdq5
+      timestamp: 2026-04-07 07:56:10.57007002 +0000 UTC
+  - handle_id: k8s-pod-network.425df4d4de16083d54f78a0c0517946e2111cdd642246515c4496ce5a45d983f
+    secondary:
+      namespace: fed-grafana
+      node: subramaniamv-tk5-k8-node-2-o0dp7x-zy8li9n3p2ggrqg4
+      pod: istio-ingressgateway-5466b678d6-jb7dx
+      timestamp: 2026-04-07 07:56:10.887886878 +0000 UTC
+  - handle_id: k8s-pod-network.f6f944b98beedba5550cfdd4c2f1eb918b21c99e54f684491636a5a8ea068dbf
+    secondary:
+      namespace: fed-prometheus
+      node: subramaniamv-tk5-k8-node-2-o0dp7x-zy8li9n3p2ggrqg4
+      pod: alertmanager-prometheus-alerts-0
+      timestamp: 2026-04-07 07:56:34.963620383 +0000 UTC
+  - handle_id: k8s-pod-network.69257d7dbf6916e110d297ffd227bcc5a6e07e2fbd29a790a4b83561e629ffd5
+    secondary:
+      namespace: fed-prometheus
+      node: subramaniamv-tk5-k8-node-2-o0dp7x-zy8li9n3p2ggrqg4
+      pod: prometheus-prometheus-0
+      timestamp: 2026-04-07 07:56:35.115670586 +0000 UTC
+  - handle_id: k8s-pod-network.9986d7127d77ea91100b6fcef137feb43bb4dda6ea234cdab51cae05eb4e55ac
+    secondary:
+      namespace: fed-otel-collector
+      node: subramaniamv-tk5-k8-node-2-o0dp7x-zy8li9n3p2ggrqg4
+      pod: fed-otel-collector-pod-otel-collector-collector-q422d
+      timestamp: 2026-04-07 07:58:27.025667507 +0000 UTC
+  - handle_id: k8s-pod-network.ca0e145592b350030ebb643ac7335d3acc99f9569916600cffe9c5eff06486a2
+    secondary:
+      namespace: fed-service-reg
+      node: subramaniamv-tk5-k8-node-2-o0dp7x-zy8li9n3p2ggrqg4
+      pod: fed-service-reg-pod-service-reg-server-2
+      timestamp: 2026-04-07 07:59:22.92802469 +0000 UTC
+  - handle_id: k8s-pod-network.e5448c6f44a5be2e41c90e8db5555731a23c824846d79da5b8919560d5bbd0c2
+    secondary:
+      namespace: fed-service-reg
+      node: subramaniamv-tk5-k8-node-2-o0dp7x-zy8li9n3p2ggrqg4
+      pod: fed-service-reg-pod-service-reg-sv9nh
+      timestamp: 2026-04-07 07:59:24.39375781 +0000 UTC
+  - handle_id: k8s-pod-network.a29d920f41aecebf765b84bb342d526dab26ed113d1ce0a19378e25c83cdaaba
+    secondary:
+      namespace: fed-redis-cluster
+      node: subramaniamv-tk5-k8-node-2-o0dp7x-zy8li9n3p2ggrqg4
+      pod: rediscluster-node-for-redis-mnzw7
+      timestamp: 2026-04-07 08:00:16.258670566 +0000 UTC
+  - handle_id: k8s-pod-network.573da70162d976df752705b81533299c8a222797d270fb9e60d705018c3fcc29
+    secondary:
+      namespace: fed-redis-cluster
+      node: subramaniamv-tk5-k8-node-2-o0dp7x-zy8li9n3p2ggrqg4
+      pod: rediscluster-node-for-redis-hmdxv
+      timestamp: 2026-04-07 08:00:16.696286252 +0000 UTC
+  - handle_id: k8s-pod-network.eb97b8a19c273a5984211178b0edc2b523b0cb023ff13a4c487b02f8255f0357
+    secondary:
+      namespace: fed-smf
+      node: subramaniamv-tk5-k8-node-2-o0dp7x-zy8li9n3p2ggrqg4
+      pod: istio-egressgateway-li-8d58c9657-q8skz
+      timestamp: 2026-04-07 08:02:53.852882164 +0000 UTC
+  - handle_id: k8s-pod-network.b50eb81d9293c92a4639332a460fbf7ef2602cd68df8503b9902c9025a895e8e
+    secondary:
+      namespace: fed-smf
+      node: subramaniamv-tk5-k8-node-2-o0dp7x-zy8li9n3p2ggrqg4
+      pod: li-x1-7f8c495bf4-mg5zb
+      timestamp: 2026-04-07 08:02:55.293705855 +0000 UTC
+  - handle_id: k8s-pod-network.df57c5c2491c5f582ff9a8131f42deaf4790cd7ed434cb0c0622378baad85a93
+    secondary:
+      namespace: fed-smf
+      node: subramaniamv-tk5-k8-node-2-o0dp7x-zy8li9n3p2ggrqg4
+      pod: istcfgagt-86db8f56d9-ffwd8
+      timestamp: 2026-04-07 08:02:55.736909986 +0000 UTC
+  - handle_id: k8s-pod-network.b9caa1e472cd95f607861abb878625f2ea0843a89b4e152888da120ca138afc6
+    secondary:
+      namespace: fed-smf
+      node: subramaniamv-tk5-k8-node-2-o0dp7x-zy8li9n3p2ggrqg4
+      pod: pfcp-7fb5ff8c4c-qq77h
+      timestamp: 2026-04-07 08:02:56.269780078 +0000 UTC
+  - handle_id: k8s-pod-network.d470a2b0e4becaba6819df7a9b944215cdd5a5a71e9c3e4723f86629321cfe4f
+    secondary:
+      namespace: fed-smf
+      node: subramaniamv-tk5-k8-node-2-o0dp7x-zy8li9n3p2ggrqg4
+      pod: event-exposure-c9756579b-btqc7
+      timestamp: 2026-04-07 08:02:56.905583821 +0000 UTC
+  - handle_id: k8s-pod-network.2a9db93d147b4b9cae148fdbee10d657792eb242a8a7d7ac4cadc372228b5dc3
+    secondary:
+      namespace: fed-smf
+      node: subramaniamv-tk5-k8-node-2-o0dp7x-zy8li9n3p2ggrqg4
+      pod: nrf-agent-57984db7c8-dsk8b
+      timestamp: 2026-04-07 08:02:57.701954318 +0000 UTC
+  - handle_id: k8s-pod-network.e92246dd47f551c7df2ff988a9e0e2aba77bb5213f20b8f1b3cba7cc69aed27c
+    secondary:
+      namespace: fed-smf
+      node: subramaniamv-tk5-k8-node-2-o0dp7x-zy8li9n3p2ggrqg4
+      pod: timer-chronos-0
+      timestamp: 2026-04-07 08:03:01.664182725 +0000 UTC
+  - handle_id: k8s-pod-network.0bcde3da4e703a55533934bace536192ee3a344fdf306b0976d7dcb621157d8e
+    secondary:
+      namespace: fed-smf
+      node: subramaniamv-tk5-k8-node-2-o0dp7x-zy8li9n3p2ggrqg4
+      pod: pod-cfgmgr-7d5989d8dc-6kg5p
+      timestamp: 2026-04-07 08:03:08.145310266 +0000 UTC
+  cidr: 192.168.41.64/26
+  deleted: false
+  sequenceNumber: 1775545819238568180
+  sequenceNumberForAllocation:
+    "0": 1775545819238568085
+    "1": 1775545819238568086
+    "2": 1775545819238568087
+    "3": 1775545819238568088
+    "4": 1775545819238568089
+    "5": 1775545819238568170
+    "6": 1775545819238568091
+    "7": 1775545819238568172
+    "8": 1775545819238568095
+    "9": 1775545819238568096
+    "10": 1775545819238568174
+    "11": 1775545819238568098
+    "12": 1775545819238568176
+    "13": 1775545819238568178
+    "14": 1775545819238568104
+    "15": 1775545819238568105
+    "16": 1775545819238568106
+    "17": 1775545819238568108
+    "18": 1775545819238568110
+    "19": 1775545819238568111
+    "20": 1775545819238568112
+    "21": 1775545819238568114
+    "22": 1775545819238568116
+    "23": 1775545819238568117
+    "24": 1775545819238568118
+    "25": 1775545819238568119
+    "26": 1775545819238568120
+    "27": 1775545819238568121
+    "28": 1775545819238568122
+    "29": 1775545819238568123
+    "30": 1775545819238568124
+    "31": 1775545819238568125
+    "32": 1775545819238568126
+    "33": 1775545819238568128
+    "34": 1775545819238568129
+    "35": 1775545819238568131
+    "36": 1775545819238568133
+    "37": 1775545819238568134
+    "38": 1775545819238568136
+    "39": 1775545819238568137
+    "40": 1775545819238568139
+    "41": 1775545819238568141
+    "42": 1775545819238568142
+    "43": 1775545819238568143
+    "44": 1775545819238568145
+    "45": 1775545819238568146
+    "46": 1775545819238568147
+    "47": 1775545819238568148
+    "48": 1775545819238568149
+    "49": 1775545819238568150
+    "50": 1775545819238568152
+    "51": 1775545819238568153
+    "52": 1775545819238568154
+    "53": 1775545819238568156
+    "54": 1775545819238568158
+    "55": 1775545819238568159
+    "56": 1775545819238568160
+    "57": 1775545819238568161
+    "58": 1775545819238568162
+    "59": 1775545819238568163
+    "60": 1775545819238568164
+    "61": 1775545819238568165
+    "62": 1775545819238568167
+    "63": 1775545819238568168
+  strictAffinity: false
+  unallocated:
+  - 14
+  - 17
+  - 20
+  - 21
+  - 32
+  - 34
+  - 35
+  - 37
+  - 39
+  - 40
+  - 43
+  - 49
+  - 50
+  - 53
+  - 60
+  - 63
+  - 5
+  - 7
+  - 10
+  - 12
+  - 13

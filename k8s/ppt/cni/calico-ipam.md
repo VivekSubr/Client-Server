@@ -95,3 +95,15 @@ kubectl get ipamblocks.crd.projectcalico.org -o wide
 # See IPs allocated on your specific node
 calicoctl ipam show --show-blocks
 ```
+
+## Explanation of example 'calico-ipam.yaml'
+
+```
+
+kind: IPAMBlock
+name: 192-168-41-64-26
+cidr: 192.168.41.64/26
+affinity: host:subramaniamv-tk5-k8-node-2-...
+```
+
+It means 192.168.41.64/26 is assigned to node-2
