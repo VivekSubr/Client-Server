@@ -24,7 +24,7 @@ Example in UC worker node,
     link/ether ee:ee:ee:ee:ee:ee brd ff:ff:ff:ff:ff:ff link-netns cni-f9f62f9c-c249-c3a9-4de1-082f31bde0e3
 16: cali30567aa1efa@if3: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1480 qdisc noqueue state UP mode DEFAULT group default qlen 1000
     link/ether ee:ee:ee:ee:ee:ee brd ff:ff:ff:ff:ff:ff link-netns cni-3ca2cb05-527c-5b42-e030-c3c18a3329fd```
-
+```
 
 Common link types 
 * eth0, enp3s0 - Physical Ethernet
