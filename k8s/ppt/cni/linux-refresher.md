@@ -118,7 +118,6 @@ Bridges are lower level and hence has to go deeper - redirection is to MAC table
 # Network Namespaces
 A network namespace is an isolated copy of the network stack. Each namespace has its own.
 
-# IpTables
 ```
 [root@subramaniamv-tk5-k8-node-1-o0dp7x-zy8li9n3p2ggrqg4 ~]# ip netns list
 cni-9452c888-9079-1c86-2460-8ab02f1139a0 (id: 9)
@@ -188,3 +187,4 @@ Note the @NONE --> it means this tunnel is not linked to any other interface, it
               ↓
            ens3 (physical NIC)
 
+# IpTables
