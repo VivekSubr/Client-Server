@@ -57,12 +57,13 @@ test_transaction_isolation() {
     run_sql "DROP TABLE IF EXISTS test;"
     run_sql "CREATE TABLE test (val INT);"
     run_sql "INSERT INTO test VALUES (2);"
-    run_sql "SELECT pg_advisory_unlock_all();"
+    run_sql "SELECT pg_advisory_unlock_all();" # Ensure no leftover locks from previous runs
     echo "  Inserted initial row (2)"
 
     local tmpdir
     tmpdir=$(mktemp -d)
     chmod 777 "$tmpdir"
+    trap 'rm -rf "$tmpdir"' RETURN
 
     # Synchronization via advisory locks:
     #   Barrier 1: T1 holds → releases after step 8  → T2 waits before step 9
@@ -71,9 +72,10 @@ test_transaction_isolation() {
     #   Barrier 4: T2 holds → releases after step 12 → T1 waits before step 13
     #   Barrier 5: T1 holds → releases after step 13 → T2 waits before step 14
     #
-    # Startup: Both sessions start, acquire their gate locks, signal readiness
-    # via marker files, then wait for a "go" file before proceeding. This
-    # ensures both hold their locks before either enters the interleaved phase.
+    # Startup: Each session acquires a readiness lock (6 for T1, 7 for T2)
+    # after its gate locks, then polls for the other's readiness lock.
+    # This ensures both hold their gate locks before either enters the
+    # interleaved phase — no temp files needed.
 
     # T1 (unquoted heredoc for $tmpdir expansion)
     cat > "$tmpdir/t1.sql" << SQL
@@ -81,8 +83,8 @@ test_transaction_isolation() {
 SELECT pg_advisory_lock(1);
 SELECT pg_advisory_lock(3);
 SELECT pg_advisory_lock(5);
-\\! touch $tmpdir/t1_ready
-\\! while [ ! -f $tmpdir/go ]; do sleep 0.1; done
+SELECT pg_advisory_lock(6);
+DO \$\$ BEGIN LOOP EXIT WHEN NOT pg_try_advisory_lock(7); PERFORM pg_advisory_unlock(7); PERFORM pg_sleep(0.05); END LOOP; END \$\$;
 
 BEGIN;
 SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
@@ -120,8 +122,8 @@ SQL
 -- Acquire gate locks T2 controls
 SELECT pg_advisory_lock(2);
 SELECT pg_advisory_lock(4);
-\\! touch $tmpdir/t2_ready
-\\! while [ ! -f $tmpdir/go ]; do sleep 0.1; done
+SELECT pg_advisory_lock(7);
+DO \$\$ BEGIN LOOP EXIT WHEN NOT pg_try_advisory_lock(6); PERFORM pg_advisory_unlock(6); PERFORM pg_sleep(0.05); END LOOP; END \$\$;
 
 BEGIN;
 SET TRANSACTION ISOLATION LEVEL REPEATABLE READ;
@@ -167,20 +169,6 @@ SQL
     sudo -u "$DB_USER" psql -d "$DB_NAME" -t -A -f "$tmpdir/t2.sql" > "$tmpdir/out2" 2>&1 &
     local pid2=$!
 
-    # Wait for both sessions to confirm they hold their gate locks
-    while [[ ! -f "$tmpdir/t1_ready" ]] || [[ ! -f "$tmpdir/t2_ready" ]]; do
-        if ! kill -0 "$pid1" 2>/dev/null; then
-            echo "  ERROR: T1 died during startup:"; cat "$tmpdir/out1"; return 1
-        fi
-        if ! kill -0 "$pid2" 2>/dev/null; then
-            echo "  ERROR: T2 died during startup:"; cat "$tmpdir/out2"; return 1
-        fi
-        sleep 0.1
-    done
-
-    # Both hold their locks — release the barrier
-    touch "$tmpdir/go"
-
     wait $pid1; local rc1=$?
     wait $pid2; local rc2=$?
 
@@ -215,7 +203,6 @@ SQL
     # Cleanup
     run_sql "SELECT pg_advisory_unlock_all();"
     run_sql "DROP TABLE IF EXISTS test;"
-    rm -rf "$tmpdir"
 }
 
 test_million_random_integers() {
