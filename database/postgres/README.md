@@ -17,7 +17,6 @@ It only blocks other sessions that try to pg_advisory_lock(1) while you hold it.
 ie, the next  SELECT pg_advisory_lock(1) will block till pg_advisory_unlock(1) is done by the owning session.
 
 ```mermaid
-
 flowchart TD
   %% Setup
   S0([Setup]) --> S1[DROP/CREATE test; INSERT 2]
