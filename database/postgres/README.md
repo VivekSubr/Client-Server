@@ -1,6 +1,7 @@
 # Concurency in PostGres
 
 **Advisory locks**
+
 Advisory locks in PostgreSQL are application-level locks that you explicitly manage in your code... but these at the DB level rather than in app itself.
 
 In test_transaction_isolation, we do 
