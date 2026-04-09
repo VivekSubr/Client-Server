@@ -16,6 +16,7 @@ pg_advisory_lock(1) is non-blocking for the caller — the calling session acqui
 It only blocks other sessions that try to pg_advisory_lock(1) while you hold it. Those sessions will wait (hang) on that call until you release it with pg_advisory_unlock(1).
 ie, the next  SELECT pg_advisory_lock(1) will block till pg_advisory_unlock(1) is done by the owning session.
 
+```mermaid
 flowchart TD
   %% ----------------------------
   %% Setup (single session)
@@ -67,3 +68,4 @@ flowchart TD
 
   T2PU5 --> T2S14[T2 Step 14: SELECT -> still [2,4]<br/>(repeatable read ignores T1 commit 5)]
   T2S14 --> T2S15[T2 Step 15: COMMIT]
+```
