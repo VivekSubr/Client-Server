@@ -1,0 +1,31 @@
+[root@subramaniamv-tk5-k8-master-1-o0dp7x-zy8li9n3p2ggrqg4 ~]# kc get certificate -n fed-example -oyaml example-com-ingress-certificate
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  annotations:
+    meta.helm.sh/release-name: fed-example
+    meta.helm.sh/release-namespace: fed-example
+  creationTimestamp: "2026-04-10T13:03:00Z"
+  generation: 1
+  labels:
+    app.kubernetes.io/managed-by: Helm
+  name: example-com-ingress-certificate
+  namespace: fed-example
+  resourceVersion: "261920"
+  uid: d1a9fabb-ff15-4baf-a041-ca537c4589d8
+spec:
+  commonName: example.com
+  dnsNames:
+  - example.com
+  duration: 10h
+  issuerRef:
+    kind: ClusterIssuer
+    name: affirmed-clusterissuer
+  renewBefore: 1h
+  secretName: example-com-ingress-cert-manager
+  subject:
+    organizations:
+    - affirmednetworks
+  usages:
+  - server auth
+  - client auth

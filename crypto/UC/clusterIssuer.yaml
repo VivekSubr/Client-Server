@@ -1,0 +1,17 @@
+[root@subramaniamv-tk5-k8-master-1-o0dp7x-zy8li9n3p2ggrqg4 ~]# kc get clusterIssuer -n fed-example -oyaml affirmed-clusterissuer
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  annotations:
+    meta.helm.sh/release-name: fed-paas-helpers
+    meta.helm.sh/release-namespace: fed-paas-helpers
+  creationTimestamp: "2026-04-10T12:09:40Z"
+  generation: 1
+  labels:
+    app.kubernetes.io/managed-by: Helm
+  name: affirmed-clusterissuer
+  resourceVersion: "6214"
+  uid: 5c2372f9-56b4-4305-ae8f-ceff0e4c8a04
+spec:
+  ca:
+    secretName: ca-key-pair
