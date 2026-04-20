@@ -313,15 +313,12 @@ end;
     echo "  Created B-tree index on employees(active)"
 
     # Force index use (Postgres may prefer seq scan for 50% selectivity)
-    run_sql "SET enable_seqscan = off;"
-
+    # SET must be in the same psql session as EXPLAIN (each run_sql is a new session)
     local plan_bitmap time_bitmap
-    plan_bitmap=$(run_sql "EXPLAIN SELECT count(*) FROM employees WHERE active = true;")
-    time_bitmap=$(run_sql "EXPLAIN ANALYZE SELECT count(*) FROM employees WHERE active = true;" | grep "Execution Time" | awk '{print $3}')
+    plan_bitmap=$(run_sql "SET enable_seqscan = off; EXPLAIN SELECT count(*) FROM employees WHERE active = true;")
+    time_bitmap=$(run_sql "SET enable_seqscan = off; EXPLAIN ANALYZE SELECT count(*) FROM employees WHERE active = true;" | grep "Execution Time" | awk '{print $3}')
     echo "  Bitmap Index Scan:    ${time_bitmap} ms"
     echo "    Plan: $(echo "$plan_bitmap" | head -1)"
-
-    run_sql "SET enable_seqscan = on;"
 
     if echo "$plan_bitmap" | grep -qi "bitmap"; then
         echo "  PASS: Low-cardinality query uses Bitmap scan"
