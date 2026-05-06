@@ -343,6 +343,112 @@ end;
     run_sql "DROP FUNCTION IF EXISTS random_string(integer);"
 }
 
+test_full_text_search() {
+    echo "=== Test: Full Text Search on user summaries ==="
+
+    local script_dir
+    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    local data_file="$script_dir/example_full_text_search_data.json"
+
+    if [[ ! -f "$data_file" ]]; then
+        echo "  ERROR: Data file not found: $data_file"
+        ((FAILED++))
+        return 1
+    fi
+
+    # Create table with a generated tsvector column for full text search
+    run_sql "DROP TABLE IF EXISTS user_summaries;"
+    run_sql "CREATE TABLE user_summaries (
+        userid INT PRIMARY KEY,
+        summary VARCHAR(255),
+        summary_tsv tsvector GENERATED ALWAYS AS (to_tsvector('english', summary)) STORED
+    );"
+    # GIN index on the tsvector column for fast full text search
+    run_sql "CREATE INDEX idx_user_summaries_tsv ON user_summaries USING GIN (summary_tsv);"
+
+    # Load JSON file directly into Postgres using psql's `\set ... `cat file``
+    # variable substitution — no jq required. Make file readable by postgres user.
+    local tmpfile
+    tmpfile=$(mktemp /tmp/fts_data.XXXXXX.json)
+    cp "$data_file" "$tmpfile"
+    chmod 644 "$tmpfile"
+
+    sudo -u "$DB_USER" psql -d "$DB_NAME" -t -A >/dev/null 2>&1 << SQL
+\\set content \`cat $tmpfile\`
+INSERT INTO user_summaries (userid, summary)
+SELECT (e->>'userid')::INT, e->>'summary'
+FROM jsonb_array_elements(:'content'::jsonb) AS e;
+SQL
+    rm -f "$tmpfile"
+
+    local count
+    count=$(run_sql "SELECT count(*) FROM user_summaries;")
+    echo "  Inserted $count user summary rows"
+    if [[ "$count" -lt 1 ]]; then
+        echo "  ERROR: No rows inserted"
+        ((FAILED++))
+        run_sql "DROP TABLE IF EXISTS user_summaries;"
+        return 1
+    fi
+
+    # Showcase 1: simple keyword search
+    echo ""
+    echo "  --- Search: 'engineer' ---"
+    local engineer_hits
+    engineer_hits=$(run_sql "SELECT userid FROM user_summaries WHERE summary_tsv @@ to_tsquery('english','engineer') ORDER BY userid;")
+    echo "$engineer_hits" | sed 's/^/    userid=/'
+
+    # Showcase 2: multi-term AND query with ranking
+    echo ""
+    echo "  --- Search: 'machine & learning' (ranked) ---"
+    run_sql "SELECT userid,
+                    ts_rank(summary_tsv, to_tsquery('english','machine & learning')) AS rank,
+                    left(summary, 70) || '...' AS snippet
+             FROM user_summaries
+             WHERE summary_tsv @@ to_tsquery('english','machine & learning')
+             ORDER BY rank DESC;" \
+        | awk -F'|' '{ printf "    userid=%s rank=%s\n      %s\n", $1, $2, $3 }'
+
+    # Showcase 3: phrase / OR query with highlighted headline
+    echo ""
+    echo "  --- Search: 'cloud | kubernetes' (with headline) ---"
+    run_sql "SELECT userid,
+                    ts_headline('english', summary,
+                                to_tsquery('english','cloud | kubernetes'),
+                                'StartSel=[, StopSel=], MaxWords=20, MinWords=10') AS headline
+             FROM user_summaries
+             WHERE summary_tsv @@ to_tsquery('english','cloud | kubernetes')
+             ORDER BY userid;" \
+        | awk -F'|' '{ printf "    userid=%s\n      %s\n", $1, $2 }'
+
+    # Assertions: validate known matches against the seed data
+    local count_engineer count_ml count_cloud
+    count_engineer=$(run_sql "SELECT count(*) FROM user_summaries WHERE summary_tsv @@ to_tsquery('english','engineer');")
+    count_ml=$(run_sql "SELECT count(*) FROM user_summaries WHERE summary_tsv @@ to_tsquery('english','machine & learning');")
+    count_cloud=$(run_sql "SELECT count(*) FROM user_summaries WHERE summary_tsv @@ to_tsquery('english','cloud | kubernetes');")
+
+    echo ""
+    if [[ "$count_engineer" -ge 1 ]]; then echo "  PASS: 'engineer' matches $count_engineer rows"; PASSED=$((PASSED+1));
+    else echo "  FAIL: 'engineer' matched 0 rows"; FAILED=$((FAILED+1)); fi
+    if [[ "$count_ml"       -ge 1 ]]; then echo "  PASS: 'machine & learning' matches $count_ml rows"; PASSED=$((PASSED+1));
+    else echo "  FAIL: 'machine & learning' matched 0 rows"; FAILED=$((FAILED+1)); fi
+    if [[ "$count_cloud"    -ge 1 ]]; then echo "  PASS: 'cloud | kubernetes' matches $count_cloud rows"; PASSED=$((PASSED+1));
+    else echo "  FAIL: 'cloud | kubernetes' matched 0 rows"; FAILED=$((FAILED+1)); fi
+
+    # Confirm GIN index is used for FTS
+    local plan
+    plan=$(run_sql "EXPLAIN SELECT userid FROM user_summaries WHERE summary_tsv @@ to_tsquery('english','engineer');")
+    if echo "$plan" | grep -qi "idx_user_summaries_tsv\|Bitmap Index Scan"; then
+        echo "  PASS: FTS query plan uses GIN index"
+        PASSED=$((PASSED+1))
+    else
+        echo "  NOTE: planner chose seq scan (small table) — plan: $(echo "$plan" | head -1)"
+    fi
+
+    # Cleanup
+    run_sql "DROP TABLE IF EXISTS user_summaries;"
+}
+
 # --- Teardown ---
 
 teardown() {
@@ -356,6 +462,7 @@ ALL_TESTS=(
     test_transaction_isolation
     test_million_random_integers
     test_index_performance
+    test_full_text_search
 )
 
 # --- Run All Tests ---

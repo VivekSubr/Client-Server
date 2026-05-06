@@ -1,0 +1,42 @@
+[
+  {
+    "userid": 1001,
+    "summary": "Alice Johnson is a senior backend engineer in Seattle specializing in distributed systems, PostgreSQL tuning, and Kafka pipelines. She enjoys hiking, open-source work, and mentoring junior developers on weekends."
+  },
+  {
+    "userid": 1002,
+    "summary": "Bob Martinez works as a data scientist in Austin focusing on natural language processing, recommendation engines, and ETL workflows. He plays jazz guitar, brews coffee, and writes a weekly machine learning newsletter."
+  },
+  {
+    "userid": 1003,
+    "summary": "Catherine Liu is a frontend developer in Toronto building accessible React applications and design systems. She advocates for inclusive web standards, organizes meetups, and shares CSS animation tutorials on YouTube."
+  },
+  {
+    "userid": 1004,
+    "summary": "David Patel manages cloud infrastructure across AWS and GCP for a fintech startup in London. Skilled in Terraform, Kubernetes, and observability, he competes in chess and collects vintage mechanical keyboards."
+  },
+  {
+    "userid": 1005,
+    "summary": "Emily Nakamura is a UX researcher in Tokyo studying mobile commerce across Asian markets. She runs ethnographic interviews, builds journey maps, and speaks at conferences on cross-cultural usability."
+  },
+  {
+    "userid": 1006,
+    "summary": "Farhan Ahmed is a DevOps engineer from Dubai automating CI/CD pipelines for global e-commerce platforms. He contributes to GitHub Actions plugins, mentors students, and races drones on weekends."
+  },
+  {
+    "userid": 1007,
+    "summary": "Grace O'Connor is a security analyst in Dublin doing penetration testing, threat modeling, and zero-trust work for healthcare clients. She holds OSCP, plays rugby, and teaches cybersecurity to teen girls."
+  },
+  {
+    "userid": 1008,
+    "summary": "Hiroshi Tanaka is a mobile developer in Osaka crafting cross-platform Flutter apps for retail and logistics. Passionate about clean architecture, he practices kendo and restores vintage film cameras."
+  },
+  {
+    "userid": 1009,
+    "summary": "Isabela Souza is a product manager in Sao Paulo leading payments features for a Latin American neobank. She drives roadmap strategy, dances samba, and hosts a podcast about women fintech founders."
+  },
+  {
+    "userid": 1010,
+    "summary": "Jakub Nowak is a machine learning engineer in Warsaw deploying computer vision models for autonomous warehouse robots. He publishes papers on edge inference, cycles long distances, and brews sour beers."
+  }
+]
