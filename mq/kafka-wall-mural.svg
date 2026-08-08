@@ -1,0 +1,209 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2400" height="1500" viewBox="0 0 1600 1000" role="img" aria-labelledby="title desc">
+  <title id="title">Apache Kafka explained as a painted city wall</title>
+  <desc id="desc">A mural-style diagram showing producers, Kafka brokers, topics, partitions, replication, offsets, and consumer groups.</desc>
+  <defs>
+    <linearGradient id="wall" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f2c879"/>
+      <stop offset=".45" stop-color="#e89a68"/>
+      <stop offset="1" stop-color="#87506d"/>
+    </linearGradient>
+    <linearGradient id="topicA" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#ffd447"/>
+      <stop offset="1" stop-color="#ff785a"/>
+    </linearGradient>
+    <linearGradient id="topicB" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#69e6d7"/>
+      <stop offset="1" stop-color="#43a8d8"/>
+    </linearGradient>
+    <filter id="rough" x="-10%" y="-10%" width="120%" height="120%">
+      <feTurbulence type="fractalNoise" baseFrequency=".012 .08" numOctaves="2" seed="8" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="3"/>
+    </filter>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="9" dy="12" stdDeviation="2" flood-color="#27213c" flood-opacity=".45"/>
+    </filter>
+    <pattern id="brick" width="160" height="70" patternUnits="userSpaceOnUse">
+      <path d="M0 0H160M0 70H160M80 0V35M0 35H160M40 35V70M120 35V70" fill="none" stroke="#583e45" stroke-width="5" opacity=".18"/>
+    </pattern>
+    <marker id="arrowYellow" markerWidth="13" markerHeight="13" refX="10" refY="6.5" orient="auto">
+      <path d="M0 0L13 6.5 0 13Z" fill="#ffe66d" stroke="#352f44" stroke-width="1.5"/>
+    </marker>
+    <marker id="arrowBlue" markerWidth="13" markerHeight="13" refX="10" refY="6.5" orient="auto">
+      <path d="M0 0L13 6.5 0 13Z" fill="#67e8f9" stroke="#352f44" stroke-width="1.5"/>
+    </marker>
+    <style>
+      .ink { stroke:#302b42; stroke-width:8; stroke-linecap:round; stroke-linejoin:round; }
+      .thin { stroke:#302b42; stroke-width:5; stroke-linecap:round; stroke-linejoin:round; }
+      .label { font-family:'Trebuchet MS','Segoe UI',sans-serif; font-weight:900; fill:#fff8df; stroke:#302b42; stroke-width:7; paint-order:stroke; letter-spacing:2px; }
+      .note { font-family:'Trebuchet MS','Segoe UI',sans-serif; font-weight:800; fill:#302b42; }
+      .chalk { font-family:'Comic Sans MS','Trebuchet MS',sans-serif; font-weight:700; fill:#fff8df; }
+    </style>
+  </defs>
+
+  <rect width="1600" height="1000" fill="url(#wall)"/>
+  <rect width="1600" height="1000" fill="url(#brick)"/>
+  <path d="M0 115Q240 55 440 105T850 88T1220 110T1600 55V0H0Z" fill="#2d2b55" opacity=".92"/>
+  <path d="M0 940Q210 895 400 940T820 925T1200 940T1600 900V1000H0Z" fill="#2d2b55"/>
+  <g opacity=".28" fill="none" stroke="#fff3cf" stroke-width="16">
+    <path d="M80 210Q165 145 250 205T420 205"/>
+    <path d="M1180 200q105-95 215 5"/>
+    <path d="M125 780q95 105 205 0"/>
+    <circle cx="1480" cy="760" r="76"/>
+  </g>
+
+  <text x="800" y="78" text-anchor="middle" font-size="62" class="label">KAFKA: THE EVENT STREAMING WALL</text>
+  <text x="800" y="124" text-anchor="middle" font-size="23" class="chalk">WRITE EVENTS ONCE • KEEP THEM IN ORDER • LET MANY READERS REPLAY</text>
+
+  <!-- Producers -->
+  <g transform="translate(55 210)">
+    <path d="M5 20Q110-10 220 25L212 205Q105 238 0 198Z" fill="#f45d8c" class="ink"/>
+    <text x="108" y="60" text-anchor="middle" font-size="30" class="label">PRODUCERS</text>
+    <g transform="translate(24 88)">
+      <rect width="51" height="65" rx="7" fill="#ffe66d" class="thin"/>
+      <path d="M11 20h29M11 34h22M11 48h27" class="thin" fill="none"/>
+      <rect x="61" y="17" width="51" height="65" rx="7" fill="#67e8f9" class="thin"/>
+      <path d="M72 37h29M72 51h22M72 65h27" class="thin" fill="none"/>
+      <rect x="122" y="-5" width="51" height="65" rx="7" fill="#b8f260" class="thin"/>
+      <path d="M133 15h29M133 29h22M133 43h27" class="thin" fill="none"/>
+    </g>
+    <text x="108" y="185" text-anchor="middle" font-size="18" class="note">apps publish events</text>
+  </g>
+
+  <path d="M280 290C345 255 375 255 432 286" fill="none" stroke="#ffe66d" stroke-width="15" class="ink" marker-end="url(#arrowYellow)"/>
+  <text x="350" y="235" text-anchor="middle" font-size="21" class="note" transform="rotate(-5 350 235)">SEND RECORDS</text>
+  <g transform="translate(338 278) rotate(-7)">
+    <rect width="78" height="42" rx="9" fill="#fff8df" class="thin"/>
+    <text x="39" y="28" text-anchor="middle" font-size="18" class="note">key + value</text>
+  </g>
+
+  <!-- Kafka cluster -->
+  <g filter="url(#shadow)">
+    <path d="M445 170Q790 120 1138 175L1112 774Q790 822 460 770Z" fill="#342f56" class="ink"/>
+    <path d="M470 196Q790 156 1115 198L1091 742Q790 775 484 741Z" fill="#f2d7a6" opacity=".14" stroke="#fff1ce" stroke-width="4" stroke-dasharray="14 12"/>
+  </g>
+  <text x="790" y="220" text-anchor="middle" font-size="42" class="label">KAFKA CLUSTER</text>
+  <text x="790" y="252" text-anchor="middle" font-size="19" class="chalk">A DURABLE, DISTRIBUTED LOG</text>
+
+  <!-- Broker buildings -->
+  <g transform="translate(490 280)">
+    <path d="M0 35L95 0l95 35v390H0Z" fill="#ef476f" class="ink"/>
+    <text x="95" y="68" text-anchor="middle" font-size="27" class="label">BROKER 1</text>
+    <g fill="#ffe66d" stroke="#302b42" stroke-width="5">
+      <rect x="22" y="94" width="145" height="48" rx="9"/><rect x="22" y="157" width="145" height="48" rx="9"/>
+      <rect x="22" y="220" width="145" height="48" rx="9"/><rect x="22" y="283" width="145" height="48" rx="9"/>
+    </g>
+    <g class="note" font-size="17">
+      <text x="95" y="125" text-anchor="middle">orders • P0</text><text x="95" y="188" text-anchor="middle">orders • P2</text>
+      <text x="95" y="251" text-anchor="middle">payments • P1</text><text x="95" y="314" text-anchor="middle">replica copies</text>
+    </g>
+    <path d="M34 370h122" class="thin"/><circle cx="61" cy="370" r="9" fill="#67e8f9" class="thin"/>
+    <circle cx="95" cy="370" r="9" fill="#b8f260" class="thin"/><circle cx="129" cy="370" r="9" fill="#ffb45d" class="thin"/>
+  </g>
+
+  <g transform="translate(696 280)">
+    <path d="M0 35L95 0l95 35v390H0Z" fill="#15b9b1" class="ink"/>
+    <text x="95" y="68" text-anchor="middle" font-size="27" class="label">BROKER 2</text>
+    <g fill="#67e8f9" stroke="#302b42" stroke-width="5">
+      <rect x="22" y="94" width="145" height="48" rx="9"/><rect x="22" y="157" width="145" height="48" rx="9"/>
+      <rect x="22" y="220" width="145" height="48" rx="9"/><rect x="22" y="283" width="145" height="48" rx="9"/>
+    </g>
+    <g class="note" font-size="17">
+      <text x="95" y="125" text-anchor="middle">orders • P1</text><text x="95" y="188" text-anchor="middle">payments • P0</text>
+      <text x="95" y="251" text-anchor="middle">payments • P2</text><text x="95" y="314" text-anchor="middle">replica copies</text>
+    </g>
+    <path d="M34 370h122" class="thin"/><circle cx="61" cy="370" r="9" fill="#ffe66d" class="thin"/>
+    <circle cx="95" cy="370" r="9" fill="#b8f260" class="thin"/><circle cx="129" cy="370" r="9" fill="#ff7b9c" class="thin"/>
+  </g>
+
+  <g transform="translate(902 280)">
+    <path d="M0 35L95 0l95 35v390H0Z" fill="#7c5ce7" class="ink"/>
+    <text x="95" y="68" text-anchor="middle" font-size="27" class="label">BROKER 3</text>
+    <g fill="#b8f260" stroke="#302b42" stroke-width="5">
+      <rect x="22" y="94" width="145" height="48" rx="9"/><rect x="22" y="157" width="145" height="48" rx="9"/>
+      <rect x="22" y="220" width="145" height="48" rx="9"/><rect x="22" y="283" width="145" height="48" rx="9"/>
+    </g>
+    <g class="note" font-size="17">
+      <text x="95" y="125" text-anchor="middle">orders • P2</text><text x="95" y="188" text-anchor="middle">orders • P0</text>
+      <text x="95" y="251" text-anchor="middle">payments • P2</text><text x="95" y="314" text-anchor="middle">replica copies</text>
+    </g>
+    <path d="M34 370h122" class="thin"/><circle cx="61" cy="370" r="9" fill="#ffe66d" class="thin"/>
+    <circle cx="95" cy="370" r="9" fill="#67e8f9" class="thin"/><circle cx="129" cy="370" r="9" fill="#ff7b9c" class="thin"/>
+  </g>
+
+  <!-- Replication -->
+  <path d="M584 699Q790 756 996 699" fill="none" stroke="#ffb45d" stroke-width="10" stroke-dasharray="17 13" class="thin"/>
+  <path d="M996 715Q790 775 584 715" fill="none" stroke="#67e8f9" stroke-width="8" stroke-dasharray="12 14"/>
+  <text x="790" y="746" text-anchor="middle" font-size="21" class="label">REPLICATION = SURVIVES BROKER FAILURE</text>
+
+  <!-- Topics and partitions legend -->
+  <g transform="translate(310 805) rotate(-2)">
+    <path d="M0 10Q248-17 502 8L494 125Q250 151 5 122Z" fill="#fff1cf" class="ink"/>
+    <text x="24" y="45" font-size="25" class="note">TOPIC</text>
+    <rect x="116" y="18" width="163" height="36" rx="18" fill="url(#topicA)" class="thin"/>
+    <text x="197" y="43" text-anchor="middle" font-size="18" class="note">orders</text>
+    <rect x="293" y="18" width="176" height="36" rx="18" fill="url(#topicB)" class="thin"/>
+    <text x="381" y="43" text-anchor="middle" font-size="18" class="note">payments</text>
+    <text x="24" y="88" font-size="23" class="note">PARTITIONS</text>
+    <g transform="translate(160 66)">
+      <rect width="89" height="40" rx="7" fill="#ffd447" class="thin"/><rect x="99" width="89" height="40" rx="7" fill="#ff9e5d" class="thin"/>
+      <rect x="198" width="89" height="40" rx="7" fill="#69e6d7" class="thin"/>
+      <text x="44" y="27" text-anchor="middle" class="note">P0</text><text x="143" y="27" text-anchor="middle" class="note">P1</text>
+      <text x="242" y="27" text-anchor="middle" class="note">P2</text>
+    </g>
+    <text x="250" y="130" text-anchor="middle" font-size="17" class="note">parallel lanes; order is guaranteed inside each lane</text>
+  </g>
+
+  <!-- Consumers -->
+  <path d="M1125 320C1190 285 1225 288 1276 324" fill="none" stroke="#67e8f9" stroke-width="15" class="ink" marker-end="url(#arrowBlue)"/>
+  <text x="1203" y="270" text-anchor="middle" font-size="21" class="note" transform="rotate(5 1203 270)">READ / REPLAY</text>
+
+  <g transform="translate(1280 198)">
+    <path d="M0 25Q122-10 245 24L235 252Q118 280 7 247Z" fill="#ffd447" class="ink"/>
+    <text x="121" y="65" text-anchor="middle" font-size="27" class="label">CONSUMER</text>
+    <text x="121" y="96" text-anchor="middle" font-size="27" class="label">GROUP A</text>
+    <g transform="translate(34 120)" fill="#fff8df" stroke="#302b42" stroke-width="6">
+      <circle cx="34" cy="34" r="28"/><circle cx="87" cy="55" r="28"/><circle cx="140" cy="34" r="28"/>
+      <path d="M12 95q22-31 44 0M65 116q22-31 44 0M118 95q22-31 44 0" fill="none"/>
+    </g>
+    <text x="121" y="228" text-anchor="middle" font-size="18" class="note">shares partitions</text>
+  </g>
+
+  <g transform="translate(1280 505)">
+    <path d="M0 25Q122-10 245 24L235 252Q118 280 7 247Z" fill="#67e8f9" class="ink"/>
+    <text x="121" y="65" text-anchor="middle" font-size="27" class="label">CONSUMER</text>
+    <text x="121" y="96" text-anchor="middle" font-size="27" class="label">GROUP B</text>
+    <g transform="translate(34 120)" fill="#fff8df" stroke="#302b42" stroke-width="6">
+      <circle cx="34" cy="34" r="28"/><circle cx="87" cy="55" r="28"/><circle cx="140" cy="34" r="28"/>
+      <path d="M12 95q22-31 44 0M65 116q22-31 44 0M118 95q22-31 44 0" fill="none"/>
+    </g>
+    <text x="121" y="228" text-anchor="middle" font-size="18" class="note">reads independently</text>
+  </g>
+
+  <!-- Offsets -->
+  <g transform="translate(1110 810) rotate(2)">
+    <path d="M0 8Q205-14 410 7L402 123Q204 145 8 121Z" fill="#f45d8c" class="ink"/>
+    <text x="205" y="45" text-anchor="middle" font-size="27" class="label">OFFSET = BOOKMARK</text>
+    <g transform="translate(30 62)">
+      <rect width="56" height="38" rx="6" fill="#fff8df" class="thin"/><rect x="65" width="56" height="38" rx="6" fill="#fff8df" class="thin"/>
+      <rect x="130" width="56" height="38" rx="6" fill="#ffe66d" class="thin"/><rect x="195" width="56" height="38" rx="6" fill="#fff8df" class="thin"/>
+      <rect x="260" width="56" height="38" rx="6" fill="#fff8df" class="thin"/>
+      <text x="28" y="26" text-anchor="middle" class="note">0</text><text x="93" y="26" text-anchor="middle" class="note">1</text>
+      <text x="158" y="26" text-anchor="middle" class="note">2</text><text x="223" y="26" text-anchor="middle" class="note">3</text>
+      <text x="288" y="26" text-anchor="middle" class="note">4</text>
+      <path d="M158-15v14" class="thin"/><path d="M145-14l13-14 13 14" fill="#ffe66d" class="thin"/>
+    </g>
+    <text x="205" y="120" text-anchor="middle" font-size="16" class="note">resume, rewind, or replay</text>
+  </g>
+
+  <g transform="translate(55 500) rotate(-3)">
+    <path d="M0 8Q102-10 208 8L198 222Q100 242 8 218Z" fill="#b8f260" class="ink"/>
+    <text x="103" y="50" text-anchor="middle" font-size="25" class="label">THE BIG IDEA</text>
+    <text x="28" y="90" font-size="19" class="note">1. Events append</text>
+    <text x="28" y="122" font-size="19" class="note">2. Kafka retains</text>
+    <text x="28" y="154" font-size="19" class="note">3. Groups track</text>
+    <text x="28" y="186" font-size="19" class="note">   their own offsets</text>
+    <path d="M29 202q75 27 145-5" fill="none" class="thin"/>
+  </g>
+
+  <text x="800" y="976" text-anchor="middle" font-size="24" class="chalk">FAST • SCALABLE • FAULT-TOLERANT • REPLAYABLE</text>
+</svg>

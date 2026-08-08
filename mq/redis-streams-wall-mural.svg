@@ -1,0 +1,233 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="title desc">
+  <title id="title">Redis Streams explained as an urban river mural</title>
+  <desc id="desc">A labeled wall-painting diagram showing producers using XADD, ordered stream entries and IDs, consumer groups, consumers, the pending entries list, XACK, replay, and trimming.</desc>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#13233b"/>
+      <stop offset=".48" stop-color="#51365d"/>
+      <stop offset="1" stop-color="#a84d60"/>
+    </linearGradient>
+    <linearGradient id="river" x1="0" y1="0" x2="1" y2=".3">
+      <stop offset="0" stop-color="#10d7c4"/>
+      <stop offset=".45" stop-color="#42bff5"/>
+      <stop offset="1" stop-color="#6657e8"/>
+    </linearGradient>
+    <linearGradient id="sun" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fff17a"/>
+      <stop offset="1" stop-color="#ff8657"/>
+    </linearGradient>
+    <pattern id="brick" width="160" height="72" patternUnits="userSpaceOnUse">
+      <path d="M0 0H160M0 36H160M0 72H160M80 0V36M40 36V72M120 36V72" fill="none" stroke="#ffd8ad" stroke-width="5" opacity=".075"/>
+    </pattern>
+    <pattern id="speckles" width="90" height="90" patternUnits="userSpaceOnUse">
+      <circle cx="12" cy="18" r="2.5" fill="#fff2cc" opacity=".18"/>
+      <circle cx="62" cy="27" r="1.8" fill="#fff2cc" opacity=".14"/>
+      <circle cx="35" cy="72" r="2" fill="#fff2cc" opacity=".12"/>
+    </pattern>
+    <filter id="shadow" x="-30%" y="-30%" width="170%" height="170%">
+      <feDropShadow dx="9" dy="12" stdDeviation="2.2" flood-color="#090d1e" flood-opacity=".55"/>
+    </filter>
+    <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="13"/>
+    </filter>
+    <marker id="arrowCoral" markerWidth="13" markerHeight="13" refX="10" refY="6.5" orient="auto">
+      <path d="M0 0L13 6.5 0 13Z" fill="#ff6b69" stroke="#181b35" stroke-width="1.6"/>
+    </marker>
+    <marker id="arrowGold" markerWidth="13" markerHeight="13" refX="10" refY="6.5" orient="auto">
+      <path d="M0 0L13 6.5 0 13Z" fill="#ffe66d" stroke="#181b35" stroke-width="1.6"/>
+    </marker>
+    <marker id="arrowMint" markerWidth="13" markerHeight="13" refX="10" refY="6.5" orient="auto">
+      <path d="M0 0L13 6.5 0 13Z" fill="#55f2ca" stroke="#181b35" stroke-width="1.6"/>
+    </marker>
+    <style>
+      .ink{stroke:#181b35;stroke-width:8;stroke-linecap:round;stroke-linejoin:round}
+      .thin{stroke:#181b35;stroke-width:5;stroke-linecap:round;stroke-linejoin:round}
+      .paint{font-family:'Trebuchet MS','Segoe UI',sans-serif;font-weight:900;fill:#fff8df;stroke:#181b35;stroke-width:8;paint-order:stroke;letter-spacing:2px}
+      .label{font-family:'Trebuchet MS','Segoe UI',sans-serif;font-weight:900;fill:#181b35}
+      .chalk{font-family:'Comic Sans MS','Trebuchet MS',sans-serif;font-weight:700;fill:#fff8df}
+      .code{font-family:Consolas,'Courier New',monospace;font-weight:800;fill:#181b35}
+    </style>
+  </defs>
+
+  <rect width="1600" height="1000" fill="url(#sky)"/>
+  <rect width="1600" height="1000" fill="url(#brick)"/>
+  <rect width="1600" height="1000" fill="url(#speckles)"/>
+
+  <!-- Painted celestial backdrop -->
+  <circle cx="1325" cy="187" r="125" fill="#ffbb62" opacity=".17" filter="url(#softGlow)"/>
+  <circle cx="1325" cy="187" r="79" fill="url(#sun)" opacity=".95"/>
+  <path d="M0 172Q145 92 287 166T568 157T845 168T1120 141T1395 158T1600 117V0H0Z" fill="#111b36" opacity=".78"/>
+  <path d="M0 900Q170 830 345 901T690 881T1040 898T1370 870T1600 885V1000H0Z" fill="#11182f"/>
+  <g fill="none" stroke-linecap="round">
+    <path d="M75 157q92-98 186 0" stroke="#ff6b8a" stroke-width="20" opacity=".48"/>
+    <path d="M1098 118q88-71 177 0" stroke="#55f2ca" stroke-width="14" opacity=".42"/>
+    <path d="M1400 350q66-72 130 0" stroke="#ffe66d" stroke-width="17" opacity=".38"/>
+    <path d="M70 785q90 82 183 0" stroke="#54cfff" stroke-width="17" opacity=".38"/>
+  </g>
+
+  <text x="800" y="72" text-anchor="middle" font-size="64" class="paint">REDIS STREAMS</text>
+  <text x="800" y="119" text-anchor="middle" font-size="25" textLength="1050" lengthAdjust="spacingAndGlyphs" class="chalk">AN APPEND-ONLY RIVER OF EVENTS — READ, TRACK, ACKNOWLEDGE, REPLAY</text>
+
+  <!-- Producers -->
+  <g transform="translate(48 205)" filter="url(#shadow)">
+    <path d="M4 23Q114-13 228 21L217 241Q111 270 8 236Z" fill="#ff675f" class="ink"/>
+    <path d="M30 24q79-22 164 0" fill="none" stroke="#ffb06b" stroke-width="9" opacity=".8"/>
+    <text x="113" y="64" text-anchor="middle" font-size="31" class="paint">PRODUCERS</text>
+    <g transform="translate(27 91)">
+      <path d="M0 17Q37-5 74 15L70 86Q35 98 2 83Z" fill="#ffe66d" class="thin"/>
+      <path d="M91 2q37-18 73 0l-2 72q-34 14-69 2Z" fill="#55f2ca" class="thin"/>
+      <path d="M17 37h39M17 52h31M17 67h37M108 23h38M108 38h30M108 53h35" class="thin" fill="none"/>
+    </g>
+    <text x="113" y="203" text-anchor="middle" font-size="19" class="label">apps create events</text>
+  </g>
+
+  <path d="M278 292C334 242 378 242 432 288" fill="none" stroke="#ff6b69" stroke-width="15" class="ink" marker-end="url(#arrowCoral)"/>
+  <g transform="translate(302 155) rotate(-6)" filter="url(#shadow)">
+    <path d="M0 8Q77-10 156 7L151 68Q77 80 5 66Z" fill="#ffe66d" class="thin"/>
+    <text x="78" y="46" text-anchor="middle" font-size="23" class="code">XADD</text>
+  </g>
+
+  <!-- Main Redis stream river -->
+  <g filter="url(#shadow)">
+    <path d="M426 219C625 160 828 259 1030 212C1128 189 1171 210 1198 273C1223 330 1191 380 1112 413C921 491 752 401 566 475C471 513 416 474 402 405C386 331 411 265 426 219Z" fill="url(#river)" class="ink"/>
+    <path d="M436 252C620 199 819 296 1019 249C1112 228 1152 241 1166 282" fill="none" stroke="#a7fff0" stroke-width="11" opacity=".75"/>
+    <path d="M424 418C501 478 565 421 655 414C818 401 929 467 1097 396" fill="none" stroke="#302a7b" stroke-width="14" opacity=".5"/>
+  </g>
+
+  <text x="796" y="201" text-anchor="middle" font-size="40" class="paint">STREAM: mystream</text>
+  <text x="796" y="237" text-anchor="middle" font-size="19" class="chalk">ONE ORDERED SEQUENCE OF ENTRIES</text>
+
+  <!-- Stream entries -->
+  <g transform="translate(475 284)">
+    <g transform="rotate(-3 86 57)">
+      <rect width="174" height="112" rx="19" fill="#fff3cf" class="ink"/>
+      <text x="87" y="31" text-anchor="middle" font-size="17" class="code">1718001000-0</text>
+      <path d="M18 43h138" class="thin"/>
+      <text x="18" y="69" font-size="16" class="code">sensor</text><text x="92" y="69" font-size="16" class="code">A7</text>
+      <text x="18" y="94" font-size="16" class="code">temp</text><text x="92" y="94" font-size="16" class="code">23.4</text>
+    </g>
+    <path d="M183 59h48" fill="none" stroke="#ffe66d" stroke-width="11" class="thin" marker-end="url(#arrowGold)"/>
+    <g transform="translate(239 -9) rotate(2 86 57)">
+      <rect width="174" height="112" rx="19" fill="#ffe66d" class="ink"/>
+      <text x="87" y="31" text-anchor="middle" font-size="17" class="code">1718001001-0</text>
+      <path d="M18 43h138" class="thin"/>
+      <text x="18" y="69" font-size="16" class="code">sensor</text><text x="92" y="69" font-size="16" class="code">B2</text>
+      <text x="18" y="94" font-size="16" class="code">temp</text><text x="92" y="94" font-size="16" class="code">19.8</text>
+    </g>
+    <path d="M422 49h48" fill="none" stroke="#ffe66d" stroke-width="11" class="thin" marker-end="url(#arrowGold)"/>
+    <g transform="translate(478 2) rotate(-2 86 57)">
+      <rect width="174" height="112" rx="19" fill="#ff9d76" class="ink"/>
+      <text x="87" y="31" text-anchor="middle" font-size="17" class="code">1718001002-0</text>
+      <path d="M18 43h138" class="thin"/>
+      <text x="18" y="69" font-size="16" class="code">sensor</text><text x="92" y="69" font-size="16" class="code">A7</text>
+      <text x="18" y="94" font-size="16" class="code">temp</text><text x="92" y="94" font-size="16" class="code">23.7</text>
+    </g>
+  </g>
+
+  <text x="791" y="449" text-anchor="middle" font-size="20" textLength="610" lengthAdjust="spacingAndGlyphs" class="paint">ENTRY ID = timestamp-sequence • IDs DEFINE ORDER</text>
+
+  <!-- Direct reader -->
+  <g transform="translate(1185 172)" filter="url(#shadow)">
+    <path d="M4 20Q170-15 334 21L326 203Q166 228 8 201Z" fill="#f3d675" class="ink"/>
+    <text x="169" y="59" text-anchor="middle" font-size="27" class="paint">SIMPLE READER</text>
+    <g transform="translate(27 79)">
+      <rect width="280" height="49" rx="13" fill="#fff8df" class="thin"/>
+      <text x="140" y="32" text-anchor="middle" font-size="19" textLength="246" lengthAdjust="spacingAndGlyphs" class="code">XREAD STREAMS mystream 0</text>
+      <path d="M16 71h248" stroke="#181b35" stroke-width="6" stroke-dasharray="13 9"/>
+      <text x="140" y="104" text-anchor="middle" font-size="18" class="label">read or replay by ID</text>
+    </g>
+  </g>
+  <path d="M1151 362Q1171 382 1191 358" fill="none" stroke="#ffe66d" stroke-width="9" class="thin" marker-end="url(#arrowGold)"/>
+
+  <!-- Consumer group island -->
+  <g transform="translate(430 526)" filter="url(#shadow)">
+    <path d="M4 30Q354-24 711 28L697 360Q352 415 12 358Z" fill="#efe0bf" class="ink"/>
+    <path d="M28 52Q352 4 682 49L674 338Q350 380 34 334Z" fill="#173d53" opacity=".13" stroke="#181b35" stroke-width="4" stroke-dasharray="15 11"/>
+    <text x="354" y="75" text-anchor="middle" font-size="36" textLength="590" lengthAdjust="spacingAndGlyphs" class="paint">CONSUMER GROUP: analytics</text>
+    <text x="354" y="111" text-anchor="middle" font-size="18" textLength="610" lengthAdjust="spacingAndGlyphs" class="label">ONE SHARED DELIVERY POSITION • WORK SPLIT ACROSS CONSUMERS</text>
+
+    <g transform="translate(50 144) rotate(-2)" filter="url(#shadow)">
+      <path d="M0 13Q134-12 268 12L261 157Q131 180 7 155Z" fill="#55f2ca" class="ink"/>
+      <text x="134" y="51" text-anchor="middle" font-size="27" class="paint">CONSUMER A</text>
+      <circle cx="72" cy="99" r="29" fill="#fff8df" class="thin"/>
+      <path d="M45 143q27-38 54 0M63 95l8 8 17-21" fill="none" class="thin"/>
+      <text x="174" y="96" text-anchor="middle" font-size="18" class="code">event 1000-0</text>
+      <text x="174" y="124" text-anchor="middle" font-size="16" class="label">processing...</text>
+    </g>
+
+    <g transform="translate(390 144) rotate(2)" filter="url(#shadow)">
+      <path d="M0 13Q134-12 268 12L261 157Q131 180 7 155Z" fill="#ff8d72" class="ink"/>
+      <text x="134" y="51" text-anchor="middle" font-size="27" class="paint">CONSUMER B</text>
+      <circle cx="72" cy="99" r="29" fill="#fff8df" class="thin"/>
+      <path d="M45 143q27-38 54 0M61 101l22-22M61 79l22 22" fill="none" class="thin"/>
+      <text x="174" y="96" text-anchor="middle" font-size="18" class="code">event 1001-0</text>
+      <text x="174" y="124" text-anchor="middle" font-size="16" class="label">processing...</text>
+    </g>
+
+    <rect x="177" y="326" width="355" height="51" rx="17" fill="#ffe66d" class="thin"/>
+    <text x="354" y="359" text-anchor="middle" font-size="20" class="code">XREADGROUP GROUP analytics ... &gt;</text>
+  </g>
+
+  <!-- Group read arrows -->
+  <path d="M709 478Q636 502 602 548" fill="none" stroke="#55f2ca" stroke-width="14" class="ink" marker-end="url(#arrowMint)"/>
+  <path d="M865 481Q930 507 968 549" fill="none" stroke="#ff6b69" stroke-width="14" class="ink" marker-end="url(#arrowCoral)"/>
+
+  <!-- Pending Entries List -->
+  <g transform="translate(1190 472)" filter="url(#shadow)">
+    <path d="M5 27Q164-17 326 25L317 264Q160 296 9 261Z" fill="#a36ae8" class="ink"/>
+    <text x="164" y="66" text-anchor="middle" font-size="27" class="paint">PENDING LIST</text>
+    <text x="164" y="94" text-anchor="middle" font-size="17" textLength="260" lengthAdjust="spacingAndGlyphs" class="chalk">delivered, not yet acknowledged</text>
+    <g transform="translate(31 116)">
+      <rect width="263" height="43" rx="10" fill="#fff3cf" class="thin"/>
+      <rect y="54" width="263" height="43" rx="10" fill="#ffe66d" class="thin"/>
+      <rect y="108" width="263" height="43" rx="10" fill="#ff9d76" class="thin"/>
+      <text x="132" y="28" text-anchor="middle" font-size="16" class="code">1000-0 → consumer-a</text>
+      <text x="132" y="82" text-anchor="middle" font-size="16" class="code">1001-0 → consumer-b</text>
+      <text x="132" y="136" text-anchor="middle" font-size="16" class="code">idle time + deliveries</text>
+    </g>
+  </g>
+
+  <path d="M1138 670Q1170 650 1202 658" fill="none" stroke="#ffe66d" stroke-width="12" class="ink" marker-end="url(#arrowGold)"/>
+  <path d="M1230 769Q1187 802 1139 808" fill="none" stroke="#55f2ca" stroke-width="11" class="thin" marker-end="url(#arrowMint)"/>
+  <g transform="translate(1028 786) rotate(2)" filter="url(#shadow)">
+    <path d="M0 8Q166-11 332 7L326 72Q164 87 6 70Z" fill="#55f2ca" class="thin"/>
+    <text x="68" y="47" text-anchor="middle" font-size="22" class="code">XACK</text>
+    <text x="211" y="45" text-anchor="middle" font-size="17" class="label">success clears pending</text>
+  </g>
+
+  <!-- Claim / recovery -->
+  <g transform="translate(1178 864) rotate(1)">
+    <path d="M0 8Q174-12 350 7L344 80Q173 96 6 78Z" fill="#ff8d72" class="ink"/>
+    <text x="175" y="38" text-anchor="middle" font-size="19" class="code">XAUTOCLAIM</text>
+    <text x="175" y="65" text-anchor="middle" font-size="16" class="label">recover abandoned work</text>
+  </g>
+
+  <!-- Retention / trim panel -->
+  <g transform="translate(55 498) rotate(-3)" filter="url(#shadow)">
+    <path d="M5 22Q151-14 297 20L288 271Q147 303 10 267Z" fill="#f4c94d" class="ink"/>
+    <text x="151" y="61" text-anchor="middle" font-size="28" class="paint">RETENTION</text>
+    <path d="M54 94h192" class="thin"/>
+    <g transform="translate(37 116)">
+      <rect width="54" height="44" rx="7" fill="#fff8df" class="thin"/>
+      <rect x="65" width="54" height="44" rx="7" fill="#fff8df" class="thin"/>
+      <rect x="130" width="54" height="44" rx="7" fill="#fff8df" class="thin"/>
+      <rect x="195" width="54" height="44" rx="7" fill="#ff8d72" class="thin"/>
+      <path d="M-4 70h257" stroke="#181b35" stroke-width="7" stroke-dasharray="12 9"/>
+      <path d="M184-10v69" stroke="#ff675f" stroke-width="8" stroke-dasharray="9 7"/>
+    </g>
+    <text x="151" y="217" text-anchor="middle" font-size="21" class="code">MAXLEN / MINID</text>
+    <text x="151" y="247" text-anchor="middle" font-size="17" class="label">trim older entries</text>
+  </g>
+
+  <!-- Bottom concept strip -->
+  <g transform="translate(337 927)">
+    <path d="M0 0Q447-31 895 0L886 60Q446 86 8 59Z" fill="#fff3cf" class="ink"/>
+    <text x="447" y="39" text-anchor="middle" font-size="21" textLength="820" lengthAdjust="spacingAndGlyphs" class="label">STREAM = ORDERED HISTORY • GROUP = COORDINATED WORK • PENDING = DELIVERY STATE</text>
+  </g>
+
+  <g opacity=".65" fill="#fff3cf">
+    <circle cx="305" cy="887" r="5"/><circle cx="328" cy="872" r="3"/><circle cx="357" cy="893" r="4"/>
+    <circle cx="1532" cy="423" r="5"/><circle cx="1509" cy="443" r="3"/><circle cx="1544" cy="460" r="4"/>
+    <circle cx="1118" cy="152" r="4"/><circle cx="1142" cy="139" r="3"/>
+  </g>
+</svg>
