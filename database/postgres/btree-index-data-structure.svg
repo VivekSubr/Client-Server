@@ -1,0 +1,138 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800" role="img" aria-labelledby="title desc">
+  <title id="title">B-tree index as a data structure</title>
+  <desc id="desc">A B-tree index routes an ordered key lookup from a root node through branches to leaf entries that point to table rows.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#061425"/>
+      <stop offset=".55" stop-color="#102a43"/>
+      <stop offset="1" stop-color="#183b52"/>
+    </linearGradient>
+    <linearGradient id="node" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="#163a5f"/>
+      <stop offset="1" stop-color="#0b233b"/>
+    </linearGradient>
+    <linearGradient id="active" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#0e7490"/>
+      <stop offset="1" stop-color="#155e75"/>
+    </linearGradient>
+    <radialGradient id="glow">
+      <stop offset="0" stop-color="#22d3ee" stop-opacity=".3"/>
+      <stop offset="1" stop-color="#22d3ee" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="12" stdDeviation="14" flood-color="#000814" flood-opacity=".5"/>
+    </filter>
+    <filter id="shine" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0 0 10 5 0 10z" fill="#67e8f9"/>
+    </marker>
+    <pattern id="grid" width="30" height="30" patternUnits="userSpaceOnUse">
+      <path d="M30 0H0V30" fill="none" stroke="#fff" stroke-opacity=".045"/>
+    </pattern>
+  </defs>
+
+  <rect width="1200" height="800" rx="28" fill="url(#bg)"/>
+  <rect width="1200" height="800" rx="28" fill="url(#grid)"/>
+  <circle cx="590" cy="340" r="420" fill="url(#glow)"/>
+
+  <g font-family="Inter, Segoe UI, Arial, sans-serif">
+    <text x="60" y="70" fill="#67e8f9" font-size="17" font-weight="800" letter-spacing="4">DATA STRUCTURE</text>
+    <text x="60" y="124" fill="#fff" font-size="48" font-weight="800">B-tree Index</text>
+    <text x="60" y="160" fill="#9fb3c8" font-size="18">Ordered keys guide the lookup through a shallow tree to a row pointer.</text>
+
+    <g transform="translate(810 58)">
+      <rect width="330" height="90" rx="20" fill="#020617" fill-opacity=".42" stroke="#67e8f9" stroke-opacity=".35"/>
+      <text x="22" y="30" fill="#94a3b8" font-size="13" font-weight="800" letter-spacing="2">LOOKUP</text>
+      <text x="22" y="65" fill="#ecfeff" font-family="Consolas, monospace" font-size="21">WHERE id = 42</text>
+    </g>
+
+    <!-- Tree connectors -->
+    <g fill="none" stroke="#7094ad" stroke-width="3" stroke-linecap="round">
+      <path d="M600 278 C600 320 300 320 300 360"/>
+      <path d="M600 278 C600 320 600 320 600 360" stroke="#67e8f9" filter="url(#shine)"/>
+      <path d="M600 278 C600 320 900 320 900 360"/>
+      <path d="M600 440 C600 477 474 477 474 512" stroke="#67e8f9" filter="url(#shine)"/>
+      <path d="M600 440 C600 477 650 477 650 512" stroke="#67e8f9" filter="url(#shine)"/>
+    </g>
+
+    <!-- Root -->
+    <g filter="url(#shadow)">
+      <rect x="460" y="206" width="280" height="74" rx="18" fill="url(#active)" stroke="#67e8f9"/>
+      <text x="485" y="232" fill="#a5f3fc" font-size="12" font-weight="800" letter-spacing="2">ROOT</text>
+      <line x1="553" y1="218" x2="553" y2="268" stroke="#67e8f9" stroke-opacity=".4"/>
+      <line x1="647" y1="218" x2="647" y2="268" stroke="#67e8f9" stroke-opacity=".4"/>
+      <text x="506" y="261" fill="#fff" font-size="23" font-weight="800">25</text>
+      <text x="578" y="261" fill="#fff" font-size="23" font-weight="800">50</text>
+      <text x="674" y="261" fill="#fff" font-size="23" font-weight="800">75</text>
+    </g>
+
+    <!-- Branch nodes -->
+    <g filter="url(#shadow)">
+      <g transform="translate(190 360)">
+        <rect width="220" height="80" rx="18" fill="url(#node)" stroke="#527996"/>
+        <text x="18" y="25" fill="#94a3b8" font-size="12" font-weight="800">BRANCH</text>
+        <text x="46" y="61" fill="#dbeafe" font-size="22" font-weight="800">8</text>
+        <line x1="94" y1="34" x2="94" y2="68" stroke="#527996"/>
+        <text x="130" y="61" fill="#dbeafe" font-size="22" font-weight="800">16</text>
+      </g>
+      <g transform="translate(490 360)">
+        <rect width="220" height="80" rx="18" fill="url(#active)" stroke="#67e8f9"/>
+        <text x="18" y="25" fill="#a5f3fc" font-size="12" font-weight="800">BRANCH</text>
+        <text x="44" y="61" fill="#fff" font-size="22" font-weight="800">34</text>
+        <line x1="108" y1="34" x2="108" y2="68" stroke="#67e8f9" stroke-opacity=".5"/>
+        <text x="139" y="61" fill="#fff" font-size="22" font-weight="800">43</text>
+      </g>
+      <g transform="translate(790 360)">
+        <rect width="220" height="80" rx="18" fill="url(#node)" stroke="#527996"/>
+        <text x="18" y="25" fill="#94a3b8" font-size="12" font-weight="800">BRANCH</text>
+        <text x="43" y="61" fill="#dbeafe" font-size="22" font-weight="800">63</text>
+        <line x1="108" y1="34" x2="108" y2="68" stroke="#527996"/>
+        <text x="139" y="61" fill="#dbeafe" font-size="22" font-weight="800">70</text>
+      </g>
+    </g>
+
+    <!-- Leaves -->
+    <g filter="url(#shadow)">
+      <g transform="translate(374 512)">
+        <rect width="200" height="92" rx="18" fill="url(#active)" stroke="#67e8f9"/>
+        <text x="18" y="25" fill="#a5f3fc" font-size="12" font-weight="800">LEAF PAGE</text>
+        <text x="18" y="58" fill="#cffafe" font-family="Consolas, monospace" font-size="17">35  38  40</text>
+        <text x="18" y="80" fill="#9fb3c8" font-size="12">key -&gt; row pointer</text>
+      </g>
+      <g transform="translate(590 512)">
+        <rect width="200" height="92" rx="18" fill="#164e63" stroke="#22d3ee" stroke-width="2"/>
+        <text x="18" y="25" fill="#a5f3fc" font-size="12" font-weight="800">LEAF PAGE</text>
+        <text x="18" y="59" fill="#fff" font-family="Consolas, monospace" font-size="17">41  [42]  43</text>
+        <rect x="57" y="37" width="45" height="30" rx="8" fill="none" stroke="#fbbf24" stroke-width="2"/>
+        <text x="18" y="82" fill="#fde68a" font-size="12" font-weight="700">match found</text>
+      </g>
+    </g>
+
+    <!-- Heap table -->
+    <path d="M790 558 C844 558 842 558 878 558" fill="none" stroke="#67e8f9" stroke-width="3" marker-end="url(#arrow)" filter="url(#shine)"/>
+    <g transform="translate(890 490)" filter="url(#shadow)">
+      <rect width="250" height="188" rx="22" fill="#071c2c" stroke="#86efac" stroke-opacity=".6"/>
+      <text x="20" y="31" fill="#86efac" font-size="13" font-weight="800" letter-spacing="2">HEAP TABLE</text>
+      <g font-family="Consolas, monospace" font-size="15">
+        <rect x="16" y="48" width="218" height="34" rx="8" fill="#102f46"/>
+        <text x="28" y="70" fill="#9fb3c8">id  name</text>
+        <text x="28" y="104" fill="#9fb3c8">41  Ada</text>
+        <rect x="16" y="113" width="218" height="34" rx="8" fill="#14532d" stroke="#4ade80"/>
+        <text x="28" y="136" fill="#dcfce7">42  Linus</text>
+        <text x="28" y="169" fill="#9fb3c8">43  Grace</text>
+      </g>
+    </g>
+
+    <!-- Complexity ribbon -->
+    <g transform="translate(60 696)">
+      <rect width="1080" height="62" rx="18" fill="#020617" fill-opacity=".5" stroke="#fff" stroke-opacity=".1"/>
+      <text x="24" y="25" fill="#67e8f9" font-size="13" font-weight="800" letter-spacing="2">MENTAL MODEL</text>
+      <text x="24" y="47" fill="#dbeafe" font-size="15">one key -&gt; one ordered path -&gt; one or more row locations</text>
+      <text x="783" y="25" fill="#fbbf24" font-size="13" font-weight="800" letter-spacing="2">STRENGTH</text>
+      <text x="783" y="47" fill="#dbeafe" font-size="15">equality, range and sorting</text>
+    </g>
+  </g>
+</svg>

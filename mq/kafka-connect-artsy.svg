@@ -1,0 +1,183 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="900" viewBox="0 0 1400 900">
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#101629"/>
+      <stop offset="0.5" stop-color="#172743"/>
+      <stop offset="1" stop-color="#0e3a3a"/>
+    </linearGradient>
+    <linearGradient id="connectGradient" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffb347"/>
+      <stop offset="1" stop-color="#ff5f6d"/>
+    </linearGradient>
+    <linearGradient id="kafkaGradient" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7f7cff"/>
+      <stop offset="1" stop-color="#31d7c8"/>
+    </linearGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="12" stdDeviation="12" flood-color="#000" flood-opacity="0.35"/>
+    </filter>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="7" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <marker id="arrowWarm" viewBox="0 0 10 10" refX="9" refY="5"
+            markerWidth="9" markerHeight="9" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#ffb347"/>
+    </marker>
+    <marker id="arrowCool" viewBox="0 0 10 10" refX="9" refY="5"
+            markerWidth="9" markerHeight="9" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#49dfd0"/>
+    </marker>
+    <pattern id="stars" width="80" height="80" patternUnits="userSpaceOnUse">
+      <circle cx="12" cy="18" r="1.4" fill="#fff" opacity="0.35"/>
+      <circle cx="58" cy="45" r="1" fill="#fff" opacity="0.22"/>
+      <circle cx="32" cy="69" r="1.2" fill="#8ce9ff" opacity="0.24"/>
+    </pattern>
+  </defs>
+
+  <rect width="1400" height="900" fill="url(#background)"/>
+  <rect width="1400" height="900" fill="url(#stars)"/>
+  <circle cx="705" cy="470" r="330" fill="#47d8cb" opacity="0.045"/>
+  <circle cx="705" cy="470" r="250" fill="#ff9b57" opacity="0.045"/>
+
+  <text x="700" y="74" text-anchor="middle" fill="#fff"
+        font-family="Segoe UI, Arial, sans-serif" font-size="44" font-weight="700">
+    KAFKA CONNECT
+  </text>
+  <text x="700" y="112" text-anchor="middle" fill="#adc6dc"
+        font-family="Segoe UI, Arial, sans-serif" font-size="19" letter-spacing="2">
+    A BRIDGE FOR CONTINUOUS DATA MOVEMENT
+  </text>
+
+  <!-- Source systems -->
+  <g filter="url(#shadow)">
+    <rect x="70" y="205" width="245" height="145" rx="28" fill="#15243c" stroke="#ffb347" stroke-width="2"/>
+    <ellipse cx="192" cy="250" rx="55" ry="18" fill="#ffb347"/>
+    <path d="M137 250v45c0 10 25 18 55 18s55-8 55-18v-45"
+          fill="#d56b58" stroke="#ffd08a" stroke-width="3"/>
+    <ellipse cx="192" cy="272" rx="55" ry="18" fill="none" stroke="#ffd08a" stroke-width="2"/>
+    <text x="192" y="333" text-anchor="middle" fill="#fff" font-family="Segoe UI, Arial" font-size="20">PostgreSQL</text>
+
+    <rect x="70" y="550" width="245" height="145" rx="28" fill="#15243c" stroke="#ffb347" stroke-width="2"/>
+    <path d="M130 600h124v58H130z" fill="#ff8c61" opacity="0.85"/>
+    <path d="M130 600l62 38 62-38" fill="none" stroke="#ffe0b7" stroke-width="5"/>
+    <text x="192" y="678" text-anchor="middle" fill="#fff" font-family="Segoe UI, Arial" font-size="20">APIs &amp; Files</text>
+  </g>
+
+  <text x="192" y="172" text-anchor="middle" fill="#ffcf89"
+        font-family="Segoe UI, Arial" font-size="23" font-weight="600">SOURCE SYSTEMS</text>
+
+  <!-- Connect cluster -->
+  <g filter="url(#shadow)">
+    <rect x="420" y="205" width="310" height="490" rx="42"
+          fill="#17243b" stroke="url(#connectGradient)" stroke-width="4"/>
+    <text x="575" y="255" text-anchor="middle" fill="#fff"
+          font-family="Segoe UI, Arial" font-size="27" font-weight="700">CONNECT CLUSTER</text>
+
+    <g>
+      <rect x="466" y="292" width="218" height="98" rx="22" fill="url(#connectGradient)"/>
+      <text x="575" y="330" text-anchor="middle" fill="#1c2035"
+            font-family="Segoe UI, Arial" font-size="19" font-weight="700">SOURCE CONNECTOR</text>
+      <text x="575" y="360" text-anchor="middle" fill="#34233a"
+            font-family="Segoe UI, Arial" font-size="16">reads external data</text>
+    </g>
+
+    <g>
+      <rect x="466" y="417" width="218" height="98" rx="22" fill="#223955" stroke="#ff9f6a" stroke-width="2"/>
+      <text x="575" y="455" text-anchor="middle" fill="#fff"
+            font-family="Segoe UI, Arial" font-size="19" font-weight="700">WORKERS &amp; TASKS</text>
+      <text x="575" y="485" text-anchor="middle" fill="#c5d8e8"
+            font-family="Segoe UI, Arial" font-size="16">scale, retry, rebalance</text>
+    </g>
+
+    <g>
+      <rect x="466" y="542" width="218" height="98" rx="22" fill="url(#connectGradient)"/>
+      <text x="575" y="580" text-anchor="middle" fill="#1c2035"
+            font-family="Segoe UI, Arial" font-size="19" font-weight="700">SINK CONNECTOR</text>
+      <text x="575" y="610" text-anchor="middle" fill="#34233a"
+            font-family="Segoe UI, Arial" font-size="16">writes external data</text>
+    </g>
+  </g>
+
+  <!-- Kafka -->
+  <g filter="url(#shadow)">
+    <rect x="835" y="235" width="260" height="430" rx="130"
+          fill="#111b31" stroke="url(#kafkaGradient)" stroke-width="4"/>
+    <circle cx="965" cy="330" r="56" fill="none" stroke="#6d8cff" stroke-width="7"/>
+    <circle cx="965" cy="330" r="13" fill="#78e3d8" filter="url(#glow)"/>
+    <circle cx="923" cy="297" r="10" fill="#7f7cff"/>
+    <circle cx="1008" cy="297" r="10" fill="#31d7c8"/>
+    <circle cx="923" cy="365" r="10" fill="#31d7c8"/>
+    <circle cx="1008" cy="365" r="10" fill="#7f7cff"/>
+    <path d="M965 330L923 297M965 330l43-33M965 330l-42 35M965 330l43 35"
+          stroke="#a8e9e4" stroke-width="4"/>
+
+    <text x="965" y="426" text-anchor="middle" fill="#fff"
+          font-family="Segoe UI, Arial" font-size="31" font-weight="700">KAFKA</text>
+    <text x="965" y="460" text-anchor="middle" fill="#9edbd7"
+          font-family="Segoe UI, Arial" font-size="18">durable event streams</text>
+
+    <g fill="#273e63" stroke="#67d9d0" stroke-width="2">
+      <rect x="890" y="500" width="150" height="38" rx="19"/>
+      <rect x="890" y="550" width="150" height="38" rx="19"/>
+      <rect x="890" y="600" width="150" height="38" rx="19"/>
+    </g>
+    <g fill="#fff" font-family="Consolas, monospace" font-size="15" text-anchor="middle">
+      <text x="965" y="525">orders</text>
+      <text x="965" y="575">customers</text>
+      <text x="965" y="625">events</text>
+    </g>
+  </g>
+
+  <!-- Sink systems -->
+  <g filter="url(#shadow)">
+    <rect x="1180" y="205" width="165" height="145" rx="28" fill="#15243c" stroke="#49dfd0" stroke-width="2"/>
+    <path d="M1225 248h75v60h-75z" fill="#4ab6cc"/>
+    <path d="M1238 262h49M1238 276h49M1238 290h34" stroke="#d9ffff" stroke-width="5"/>
+    <text x="1262" y="333" text-anchor="middle" fill="#fff" font-family="Segoe UI, Arial" font-size="19">Search</text>
+
+    <rect x="1180" y="550" width="165" height="145" rx="28" fill="#15243c" stroke="#49dfd0" stroke-width="2"/>
+    <path d="M1219 645l26-55h35l26 55z" fill="#4fd8ca"/>
+    <path d="M1233 625h59" stroke="#ddffff" stroke-width="5"/>
+    <text x="1262" y="678" text-anchor="middle" fill="#fff" font-family="Segoe UI, Arial" font-size="19">Data Lake</text>
+  </g>
+
+  <text x="1262" y="172" text-anchor="middle" fill="#82e7de"
+        font-family="Segoe UI, Arial" font-size="23" font-weight="600">DESTINATIONS</text>
+
+  <!-- Flow lines -->
+  <path d="M315 278 C360 278 380 330 448 330" fill="none" stroke="#ffb347"
+        stroke-width="6" stroke-linecap="round" marker-end="url(#arrowWarm)"/>
+  <path d="M315 622 C365 622 390 580 448 580" fill="none" stroke="#ffb347"
+        stroke-width="6" stroke-linecap="round" marker-end="url(#arrowWarm)"/>
+  <path d="M730 350 C775 350 790 390 835 390" fill="none" stroke="#ffb347"
+        stroke-width="6" stroke-linecap="round" marker-end="url(#arrowWarm)"/>
+
+  <path d="M835 530 C790 530 775 590 730 590" fill="none" stroke="#49dfd0"
+        stroke-width="6" stroke-linecap="round" marker-end="url(#arrowCool)"/>
+  <path d="M1095 350 C1140 350 1140 278 1180 278" fill="none" stroke="#49dfd0"
+        stroke-width="6" stroke-linecap="round" marker-end="url(#arrowCool)"/>
+  <path d="M1095 550 C1140 550 1140 622 1180 622" fill="none" stroke="#49dfd0"
+        stroke-width="6" stroke-linecap="round" marker-end="url(#arrowCool)"/>
+
+  <!-- Footer -->
+  <g>
+    <rect x="270" y="775" width="860" height="75" rx="36" fill="#101a2d" stroke="#42637c" stroke-width="2"/>
+    <text x="700" y="807" text-anchor="middle" fill="#fff"
+          font-family="Segoe UI, Arial" font-size="20" font-weight="600">
+      CONFIGURATION + OFFSETS + STATUS
+    </text>
+    <text x="700" y="835" text-anchor="middle" fill="#a8bfd3"
+          font-family="Segoe UI, Arial" font-size="16">
+      stored in Kafka so tasks can recover, rebalance, and continue
+    </text>
+  </g>
+
+  <text x="415" y="744" text-anchor="middle" fill="#ffcb88"
+        font-family="Segoe UI, Arial" font-size="16">INTO KAFKA</text>
+  <text x="985" y="744" text-anchor="middle" fill="#75e6dc"
+        font-family="Segoe UI, Arial" font-size="16">OUT OF KAFKA</text>
+</svg>

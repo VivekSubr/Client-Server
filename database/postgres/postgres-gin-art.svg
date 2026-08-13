@@ -1,0 +1,177 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800" role="img" aria-labelledby="title desc">
+  <title id="title">PostgreSQL GIN index explained</title>
+  <desc id="desc">An artistic infographic showing how a generalized inverted index maps searchable terms to matching table rows.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#071525"/>
+      <stop offset=".55" stop-color="#102a43"/>
+      <stop offset="1" stop-color="#193b55"/>
+    </linearGradient>
+    <radialGradient id="glow">
+      <stop offset="0" stop-color="#38bdf8" stop-opacity=".32"/>
+      <stop offset="1" stop-color="#38bdf8" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="#ffffff" stop-opacity=".13"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity=".045"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop stop-color="#22d3ee"/>
+      <stop offset="1" stop-color="#a78bfa"/>
+    </linearGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000814" flood-opacity=".45"/>
+    </filter>
+    <filter id="softGlow" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 10 5 0 10z" fill="#67e8f9"/>
+    </marker>
+    <pattern id="dots" width="28" height="28" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1.2" fill="#fff" opacity=".08"/>
+    </pattern>
+  </defs>
+
+  <rect width="1200" height="800" rx="28" fill="url(#bg)"/>
+  <rect width="1200" height="800" rx="28" fill="url(#dots)"/>
+  <circle cx="945" cy="130" r="280" fill="url(#glow)"/>
+  <circle cx="120" cy="720" r="240" fill="url(#glow)" opacity=".7"/>
+
+  <g font-family="Inter, Segoe UI, Arial, sans-serif">
+    <text x="64" y="74" fill="#e0f2fe" font-size="22" font-weight="700" letter-spacing="4">POSTGRESQL</text>
+    <text x="64" y="132" fill="#fff" font-size="54" font-weight="800">GIN</text>
+    <text x="175" y="132" fill="#bae6fd" font-size="30" font-weight="500">Generalized Inverted Index</text>
+    <text x="64" y="170" fill="#94a3b8" font-size="18">Instead of asking every row, GIN asks each searchable value where it lives.</text>
+
+    <!-- Step labels -->
+    <g font-size="14" font-weight="800" letter-spacing="2">
+      <text x="70" y="225" fill="#67e8f9">01 · DOCUMENTS</text>
+      <text x="438" y="225" fill="#c4b5fd">02 · INVERT</text>
+      <text x="812" y="225" fill="#86efac">03 · MATCH</text>
+    </g>
+
+    <!-- Source rows -->
+    <g filter="url(#shadow)">
+      <rect x="58" y="246" width="320" height="400" rx="24" fill="url(#glass)" stroke="#7dd3fc" stroke-opacity=".28"/>
+      <g font-size="16">
+        <g transform="translate(78 272)">
+          <rect width="280" height="94" rx="16" fill="#082f49" stroke="#0ea5e9" stroke-opacity=".55"/>
+          <circle cx="28" cy="29" r="15" fill="#0ea5e9"/><text x="28" y="35" fill="#fff" text-anchor="middle" font-weight="800">1</text>
+          <text x="56" y="34" fill="#e0f2fe" font-weight="700">“blue fox runs”</text>
+          <g font-size="13" font-weight="700">
+            <rect x="18" y="57" width="55" height="24" rx="12" fill="#164e63"/><text x="45" y="74" fill="#67e8f9" text-anchor="middle">blue</text>
+            <rect x="80" y="57" width="45" height="24" rx="12" fill="#312e81"/><text x="102" y="74" fill="#c4b5fd" text-anchor="middle">fox</text>
+            <rect x="132" y="57" width="48" height="24" rx="12" fill="#14532d"/><text x="156" y="74" fill="#86efac" text-anchor="middle">runs</text>
+          </g>
+        </g>
+        <g transform="translate(78 382)">
+          <rect width="280" height="94" rx="16" fill="#082f49" stroke="#0ea5e9" stroke-opacity=".35"/>
+          <circle cx="28" cy="29" r="15" fill="#6366f1"/><text x="28" y="35" fill="#fff" text-anchor="middle" font-weight="800">2</text>
+          <text x="56" y="34" fill="#e0f2fe" font-weight="700">“red fox sleeps”</text>
+          <g font-size="13" font-weight="700">
+            <rect x="18" y="57" width="45" height="24" rx="12" fill="#7f1d1d"/><text x="40" y="74" fill="#fca5a5" text-anchor="middle">red</text>
+            <rect x="70" y="57" width="45" height="24" rx="12" fill="#312e81"/><text x="92" y="74" fill="#c4b5fd" text-anchor="middle">fox</text>
+            <rect x="122" y="57" width="58" height="24" rx="12" fill="#3f3f46"/><text x="151" y="74" fill="#d4d4d8" text-anchor="middle">sleeps</text>
+          </g>
+        </g>
+        <g transform="translate(78 492)">
+          <rect width="280" height="94" rx="16" fill="#082f49" stroke="#0ea5e9" stroke-opacity=".35"/>
+          <circle cx="28" cy="29" r="15" fill="#14b8a6"/><text x="28" y="35" fill="#fff" text-anchor="middle" font-weight="800">3</text>
+          <text x="56" y="34" fill="#e0f2fe" font-weight="700">“blue owl sleeps”</text>
+          <g font-size="13" font-weight="700">
+            <rect x="18" y="57" width="55" height="24" rx="12" fill="#164e63"/><text x="45" y="74" fill="#67e8f9" text-anchor="middle">blue</text>
+            <rect x="80" y="57" width="42" height="24" rx="12" fill="#713f12"/><text x="101" y="74" fill="#fde68a" text-anchor="middle">owl</text>
+            <rect x="129" y="57" width="58" height="24" rx="12" fill="#3f3f46"/><text x="158" y="74" fill="#d4d4d8" text-anchor="middle">sleeps</text>
+          </g>
+        </g>
+      </g>
+    </g>
+
+    <!-- Flow into index -->
+    <path d="M390 446 C418 446 418 446 438 446" fill="none" stroke="#67e8f9" stroke-width="3" marker-end="url(#arrow)" filter="url(#softGlow)"/>
+
+    <!-- Inverted index -->
+    <g filter="url(#shadow)">
+      <rect x="450" y="246" width="310" height="400" rx="24" fill="url(#glass)" stroke="#c4b5fd" stroke-opacity=".3"/>
+      <text x="474" y="284" fill="#f5f3ff" font-size="16" font-weight="800">TERM</text>
+      <text x="640" y="284" fill="#f5f3ff" font-size="16" font-weight="800">ROW IDs</text>
+      <line x1="474" y1="300" x2="736" y2="300" stroke="#fff" opacity=".14"/>
+
+      <g font-size="17" font-weight="700">
+        <g transform="translate(474 322)">
+          <rect width="262" height="48" rx="13" fill="#164e63" fill-opacity=".68"/>
+          <text x="18" y="31" fill="#67e8f9">blue</text>
+          <g transform="translate(172 8)">
+            <circle cx="16" cy="16" r="16" fill="#0ea5e9"/><text x="16" y="22" fill="#fff" text-anchor="middle">1</text>
+            <circle cx="58" cy="16" r="16" fill="#14b8a6"/><text x="58" y="22" fill="#fff" text-anchor="middle">3</text>
+          </g>
+        </g>
+        <g transform="translate(474 382)">
+          <rect width="262" height="48" rx="13" fill="#312e81" fill-opacity=".68"/>
+          <text x="18" y="31" fill="#c4b5fd">fox</text>
+          <g transform="translate(172 8)">
+            <circle cx="16" cy="16" r="16" fill="#0ea5e9"/><text x="16" y="22" fill="#fff" text-anchor="middle">1</text>
+            <circle cx="58" cy="16" r="16" fill="#6366f1"/><text x="58" y="22" fill="#fff" text-anchor="middle">2</text>
+          </g>
+        </g>
+        <g transform="translate(474 442)">
+          <rect width="262" height="48" rx="13" fill="#14532d" fill-opacity=".68"/>
+          <text x="18" y="31" fill="#86efac">runs</text>
+          <g transform="translate(172 8)">
+            <circle cx="16" cy="16" r="16" fill="#0ea5e9"/><text x="16" y="22" fill="#fff" text-anchor="middle">1</text>
+          </g>
+        </g>
+        <g transform="translate(474 502)">
+          <rect width="262" height="48" rx="13" fill="#3f3f46" fill-opacity=".8"/>
+          <text x="18" y="31" fill="#e4e4e7">sleeps</text>
+          <g transform="translate(172 8)">
+            <circle cx="16" cy="16" r="16" fill="#6366f1"/><text x="16" y="22" fill="#fff" text-anchor="middle">2</text>
+            <circle cx="58" cy="16" r="16" fill="#14b8a6"/><text x="58" y="22" fill="#fff" text-anchor="middle">3</text>
+          </g>
+        </g>
+        <g transform="translate(474 562)">
+          <rect width="262" height="48" rx="13" fill="#713f12" fill-opacity=".72"/>
+          <text x="18" y="31" fill="#fde68a">owl</text>
+          <g transform="translate(172 8)">
+            <circle cx="16" cy="16" r="16" fill="#14b8a6"/><text x="16" y="22" fill="#fff" text-anchor="middle">3</text>
+          </g>
+        </g>
+      </g>
+    </g>
+
+    <path d="M772 446 C795 446 795 446 815 446" fill="none" stroke="#67e8f9" stroke-width="3" marker-end="url(#arrow)" filter="url(#softGlow)"/>
+
+    <!-- Query and result -->
+    <g filter="url(#shadow)">
+      <rect x="827" y="246" width="315" height="400" rx="24" fill="url(#glass)" stroke="#86efac" stroke-opacity=".3"/>
+      <text x="853" y="287" fill="#d1fae5" font-size="15" font-weight="800" letter-spacing="1.4">QUERY</text>
+      <rect x="853" y="308" width="263" height="62" rx="14" fill="#052e2b" stroke="#2dd4bf" stroke-opacity=".65"/>
+      <text x="871" y="345" fill="#ccfbf1" font-family="Consolas, monospace" font-size="17">@@ 'blue &amp; fox'</text>
+
+      <text x="853" y="412" fill="#94a3b8" font-size="14" font-weight="700">POSTING LIST INTERSECTION</text>
+      <g font-size="16" font-weight="800">
+        <text x="853" y="449" fill="#67e8f9">blue</text>
+        <text x="915" y="449" fill="#e2e8f0">→ {1, 3}</text>
+        <text x="853" y="481" fill="#c4b5fd">fox</text>
+        <text x="915" y="481" fill="#e2e8f0">→ {1, 2}</text>
+      </g>
+      <line x1="853" y1="504" x2="1116" y2="504" stroke="url(#accent)" stroke-width="2"/>
+      <text x="853" y="536" fill="#86efac" font-size="15" font-weight="800">MATCHING ROW</text>
+      <rect x="853" y="554" width="263" height="64" rx="16" fill="#14532d" stroke="#4ade80" stroke-opacity=".72"/>
+      <circle cx="884" cy="586" r="18" fill="#0ea5e9"/>
+      <text x="884" y="592" fill="#fff" text-anchor="middle" font-size="17" font-weight="800">1</text>
+      <text x="914" y="592" fill="#dcfce7" font-size="18" font-weight="800">“blue fox runs”</text>
+    </g>
+
+    <!-- Footer -->
+    <g transform="translate(58 690)">
+      <rect width="1084" height="66" rx="20" fill="#020617" fill-opacity=".46" stroke="#fff" stroke-opacity=".1"/>
+      <text x="24" y="27" fill="#7dd3fc" font-size="14" font-weight="800">GREAT FOR</text>
+      <text x="24" y="49" fill="#cbd5e1" font-size="15">full-text search · JSONB keys/values · arrays · multiple values per row</text>
+      <text x="760" y="27" fill="#fbbf24" font-size="14" font-weight="800">TRADE-OFF</text>
+      <text x="760" y="49" fill="#cbd5e1" font-size="15">faster reads · heavier writes</text>
+    </g>
+  </g>
+</svg>

@@ -1,6 +1,6 @@
 Kafka is a **distributed, partitioned, replicated commit log**
 
-* Producers **apend** records to end of log.
+* Producers **append** records to end of log.
 * Consumers read from an **offset**
 
 Nothing is removed on consumtion (retention is configured independently), that is how it is durable and distributed.
@@ -30,3 +30,13 @@ Client that appends records. It picks a partition per record (via key hash, expl
 
 **Consumer**
 A consumer reads a partition sequentially by tracking its own offset (stored in an internal Kafka topic, __consumer_offsets, not in the broker's head).
+
+
+## Kafka Connect
+Kafka connect is a framework for declaratively connecting systems together using generic kafka clients.
+
+eg: Database --> Source Connector --> Kafka Topics --> Sink Connector --> Elasticsearch 
+
+
+<img src="kafka-connect-artsy.svg" alt="Kafka Connect architecture diagram" width="100%" style="max-width: 900px; height: auto;" />
+

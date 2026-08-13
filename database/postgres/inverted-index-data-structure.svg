@@ -1,0 +1,153 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800" role="img" aria-labelledby="title desc">
+  <title id="title">Inverted index as a data structure</title>
+  <desc id="desc">An inverted index maps each term to a posting list of document identifiers and intersects those lists to answer a multi-term query.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#140b2d"/>
+      <stop offset=".52" stop-color="#23134d"/>
+      <stop offset="1" stop-color="#0f3046"/>
+    </linearGradient>
+    <linearGradient id="panel" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="#fff" stop-opacity=".12"/>
+      <stop offset="1" stop-color="#fff" stop-opacity=".045"/>
+    </linearGradient>
+    <linearGradient id="term" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#6d28d9"/>
+      <stop offset="1" stop-color="#4c1d95"/>
+    </linearGradient>
+    <radialGradient id="glow">
+      <stop offset="0" stop-color="#a78bfa" stop-opacity=".34"/>
+      <stop offset="1" stop-color="#a78bfa" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="12" stdDeviation="15" flood-color="#02010a" flood-opacity=".52"/>
+    </filter>
+    <filter id="shine" x="-70%" y="-70%" width="240%" height="240%">
+      <feGaussianBlur stdDeviation="5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0 0 10 5 0 10z" fill="#c4b5fd"/>
+    </marker>
+    <pattern id="dots" width="26" height="26" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1.1" fill="#fff" opacity=".06"/>
+    </pattern>
+  </defs>
+
+  <rect width="1200" height="800" rx="28" fill="url(#bg)"/>
+  <rect width="1200" height="800" rx="28" fill="url(#dots)"/>
+  <circle cx="620" cy="360" r="420" fill="url(#glow)"/>
+
+  <g font-family="Inter, Segoe UI, Arial, sans-serif">
+    <text x="60" y="70" fill="#c4b5fd" font-size="17" font-weight="800" letter-spacing="4">DATA STRUCTURE</text>
+    <text x="60" y="124" fill="#fff" font-size="48" font-weight="800">Inverted Index</text>
+    <text x="60" y="160" fill="#b9b0d0" font-size="18">Values become keys; each key stores a posting list of rows containing it.</text>
+
+    <g transform="translate(815 58)">
+      <rect width="325" height="90" rx="20" fill="#020617" fill-opacity=".42" stroke="#c4b5fd" stroke-opacity=".4"/>
+      <text x="22" y="30" fill="#a99fc2" font-size="13" font-weight="800" letter-spacing="2">LOOKUP</text>
+      <text x="22" y="65" fill="#f5f3ff" font-family="Consolas, monospace" font-size="20">"blue" AND "fox"</text>
+    </g>
+
+    <!-- Documents -->
+    <g transform="translate(60 220)" filter="url(#shadow)">
+      <rect width="300" height="410" rx="24" fill="url(#panel)" stroke="#60a5fa" stroke-opacity=".35"/>
+      <text x="24" y="38" fill="#93c5fd" font-size="13" font-weight="800" letter-spacing="2">DOCUMENT STORE</text>
+      <g font-size="16">
+        <g transform="translate(20 62)">
+          <rect width="260" height="90" rx="16" fill="#102a52" stroke="#3b82f6"/>
+          <circle cx="28" cy="28" r="15" fill="#2563eb"/><text x="28" y="34" fill="#fff" text-anchor="middle" font-weight="800">1</text>
+          <text x="54" y="34" fill="#dbeafe" font-weight="700">blue fox runs</text>
+          <text x="20" y="70" fill="#93c5fd" font-family="Consolas, monospace" font-size="14">[blue] [fox] [runs]</text>
+        </g>
+        <g transform="translate(20 166)">
+          <rect width="260" height="90" rx="16" fill="#102a52" stroke="#3b82f6" stroke-opacity=".45"/>
+          <circle cx="28" cy="28" r="15" fill="#7c3aed"/><text x="28" y="34" fill="#fff" text-anchor="middle" font-weight="800">2</text>
+          <text x="54" y="34" fill="#dbeafe" font-weight="700">red fox sleeps</text>
+          <text x="20" y="70" fill="#c4b5fd" font-family="Consolas, monospace" font-size="14">[red] [fox] [sleeps]</text>
+        </g>
+        <g transform="translate(20 270)">
+          <rect width="260" height="90" rx="16" fill="#102a52" stroke="#3b82f6" stroke-opacity=".45"/>
+          <circle cx="28" cy="28" r="15" fill="#0891b2"/><text x="28" y="34" fill="#fff" text-anchor="middle" font-weight="800">3</text>
+          <text x="54" y="34" fill="#dbeafe" font-weight="700">blue owl sleeps</text>
+          <text x="20" y="70" fill="#67e8f9" font-family="Consolas, monospace" font-size="14">[blue] [owl] [sleeps]</text>
+        </g>
+      </g>
+    </g>
+
+    <path d="M374 424 C400 424 407 424 430 424" fill="none" stroke="#c4b5fd" stroke-width="3" marker-end="url(#arrow)" filter="url(#shine)"/>
+
+    <!-- Dictionary and posting lists -->
+    <g transform="translate(445 220)" filter="url(#shadow)">
+      <rect width="400" height="410" rx="24" fill="url(#panel)" stroke="#c4b5fd" stroke-opacity=".42"/>
+      <text x="24" y="38" fill="#ddd6fe" font-size="13" font-weight="800" letter-spacing="2">TERM DICTIONARY + POSTING LISTS</text>
+      <text x="24" y="67" fill="#9489ae" font-size="12">TERM</text>
+      <text x="196" y="67" fill="#9489ae" font-size="12">DOCUMENT / ROW IDs</text>
+
+      <g transform="translate(20 82)">
+        <g>
+          <rect width="360" height="48" rx="13" fill="#164e63" stroke="#22d3ee"/>
+          <text x="18" y="31" fill="#67e8f9" font-size="17" font-weight="800">blue</text>
+          <path d="M126 24H174" stroke="#67e8f9" stroke-width="2"/>
+          <circle cx="205" cy="24" r="16" fill="#2563eb"/><text x="205" y="30" fill="#fff" text-anchor="middle" font-weight="800">1</text>
+          <circle cx="255" cy="24" r="16" fill="#0891b2"/><text x="255" y="30" fill="#fff" text-anchor="middle" font-weight="800">3</text>
+          <path d="M221 24H239" stroke="#67e8f9" stroke-width="2"/>
+        </g>
+        <g transform="translate(0 58)">
+          <rect width="360" height="48" rx="13" fill="url(#term)" stroke="#a78bfa"/>
+          <text x="18" y="31" fill="#ede9fe" font-size="17" font-weight="800">fox</text>
+          <path d="M126 24H174" stroke="#c4b5fd" stroke-width="2"/>
+          <circle cx="205" cy="24" r="16" fill="#2563eb"/><text x="205" y="30" fill="#fff" text-anchor="middle" font-weight="800">1</text>
+          <circle cx="255" cy="24" r="16" fill="#7c3aed"/><text x="255" y="30" fill="#fff" text-anchor="middle" font-weight="800">2</text>
+          <path d="M221 24H239" stroke="#c4b5fd" stroke-width="2"/>
+        </g>
+        <g transform="translate(0 116)">
+          <rect width="360" height="48" rx="13" fill="#251d40"/>
+          <text x="18" y="31" fill="#c4b5fd" font-size="17" font-weight="700">red</text>
+          <path d="M126 24H174" stroke="#756b8d" stroke-width="2"/>
+          <circle cx="205" cy="24" r="16" fill="#7c3aed"/><text x="205" y="30" fill="#fff" text-anchor="middle" font-weight="800">2</text>
+        </g>
+        <g transform="translate(0 174)">
+          <rect width="360" height="48" rx="13" fill="#251d40"/>
+          <text x="18" y="31" fill="#c4b5fd" font-size="17" font-weight="700">runs</text>
+          <path d="M126 24H174" stroke="#756b8d" stroke-width="2"/>
+          <circle cx="205" cy="24" r="16" fill="#2563eb"/><text x="205" y="30" fill="#fff" text-anchor="middle" font-weight="800">1</text>
+        </g>
+        <g transform="translate(0 232)">
+          <rect width="360" height="48" rx="13" fill="#251d40"/>
+          <text x="18" y="31" fill="#c4b5fd" font-size="17" font-weight="700">sleeps</text>
+          <path d="M126 24H174" stroke="#756b8d" stroke-width="2"/>
+          <circle cx="205" cy="24" r="16" fill="#7c3aed"/><text x="205" y="30" fill="#fff" text-anchor="middle" font-weight="800">2</text>
+          <circle cx="255" cy="24" r="16" fill="#0891b2"/><text x="255" y="30" fill="#fff" text-anchor="middle" font-weight="800">3</text>
+          <path d="M221 24H239" stroke="#756b8d" stroke-width="2"/>
+        </g>
+      </g>
+    </g>
+
+    <path d="M858 424 C882 424 888 424 910 424" fill="none" stroke="#c4b5fd" stroke-width="3" marker-end="url(#arrow)" filter="url(#shine)"/>
+
+    <!-- Intersection -->
+    <g transform="translate(925 220)" filter="url(#shadow)">
+      <rect width="215" height="410" rx="24" fill="url(#panel)" stroke="#86efac" stroke-opacity=".45"/>
+      <text x="22" y="38" fill="#86efac" font-size="13" font-weight="800" letter-spacing="2">INTERSECT</text>
+      <text x="22" y="90" fill="#67e8f9" font-size="16" font-weight="800">blue</text>
+      <text x="22" y="118" fill="#e0f2fe" font-family="Consolas, monospace" font-size="18">{1, 3}</text>
+      <text x="22" y="160" fill="#c4b5fd" font-size="16" font-weight="800">fox</text>
+      <text x="22" y="188" fill="#ede9fe" font-family="Consolas, monospace" font-size="18">{1, 2}</text>
+      <line x1="22" y1="220" x2="193" y2="220" stroke="#fff" stroke-opacity=".18"/>
+      <text x="22" y="255" fill="#a7f3d0" font-size="13" font-weight="800">COMMON ID</text>
+      <circle cx="107" cy="310" r="48" fill="#14532d" stroke="#4ade80" stroke-width="2" filter="url(#shine)"/>
+      <text x="107" y="322" fill="#fff" text-anchor="middle" font-size="34" font-weight="800">1</text>
+      <text x="107" y="380" fill="#dcfce7" text-anchor="middle" font-size="14" font-weight="700">matching row</text>
+    </g>
+
+    <!-- Footer -->
+    <g transform="translate(60 696)">
+      <rect width="1080" height="62" rx="18" fill="#020617" fill-opacity=".5" stroke="#fff" stroke-opacity=".1"/>
+      <text x="24" y="25" fill="#c4b5fd" font-size="13" font-weight="800" letter-spacing="2">MENTAL MODEL</text>
+      <text x="24" y="47" fill="#ede9fe" font-size="15">one value -&gt; a sorted list of every row containing that value</text>
+      <text x="730" y="25" fill="#fbbf24" font-size="13" font-weight="800" letter-spacing="2">STRENGTH</text>
+      <text x="730" y="47" fill="#ede9fe" font-size="15">arrays, JSON, tags and full-text search</text>
+    </g>
+  </g>
+</svg>

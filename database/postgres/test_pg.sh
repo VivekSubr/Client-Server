@@ -449,6 +449,78 @@ SQL
     run_sql "DROP TABLE IF EXISTS user_summaries;"
 }
 
+test_inverted_index() {
+    echo "=== Test: Inverted index term-to-document postings ==="
+
+    run_sql "DROP TABLE IF EXISTS inverted_index;"
+    run_sql "DROP TABLE IF EXISTS documents;"
+    run_sql "CREATE TABLE documents (
+        id INT PRIMARY KEY,
+        content TEXT NOT NULL
+    );"
+    run_sql "INSERT INTO documents (id, content) VALUES
+        (1, 'postgres index search'),
+        (2, 'inverted index maps terms to documents'),
+        (3, 'postgres inverted index supports index search');"
+
+    # Each row is a posting: one term, one matching document, and its positions.
+    run_sql "CREATE TABLE inverted_index (
+        term TEXT NOT NULL,
+        document_id INT NOT NULL REFERENCES documents(id),
+        positions INT[] NOT NULL,
+        PRIMARY KEY (term, document_id)
+    );"
+    run_sql "WITH tokens AS (
+        SELECT document.id AS document_id,
+               token.term,
+               token.position::INT
+        FROM documents AS document
+        CROSS JOIN LATERAL
+            regexp_split_to_table(lower(document.content), '[^[:alnum:]]+')
+            WITH ORDINALITY AS token(term, position)
+        WHERE token.term <> ''
+    )
+    INSERT INTO inverted_index (term, document_id, positions)
+    SELECT term, document_id, array_agg(position ORDER BY position)
+    FROM tokens
+    GROUP BY term, document_id;"
+
+    local postings positions intersection plan
+    postings=$(run_sql "SELECT array_agg(document_id ORDER BY document_id)
+                        FROM inverted_index WHERE term = 'inverted';")
+    positions=$(run_sql "SELECT positions FROM inverted_index
+                         WHERE term = 'index' AND document_id = 3;")
+    intersection=$(run_sql "SELECT array_agg(left_posting.document_id ORDER BY left_posting.document_id)
+                            FROM inverted_index AS left_posting
+                            JOIN inverted_index AS right_posting USING (document_id)
+                            WHERE left_posting.term = 'inverted'
+                              AND right_posting.term = 'search';")
+    plan=$(run_sql "SET enable_seqscan = off;
+                    EXPLAIN SELECT document_id FROM inverted_index
+                    WHERE term = 'inverted';")
+
+    echo "  inverted -> documents $postings"
+    echo "  index in document 3 -> positions $positions"
+    echo "  inverted AND search -> documents $intersection"
+    echo "  Plan: $(echo "$plan" | grep -m1 -E 'Index|Bitmap')"
+    echo ""
+
+    assert_eq "Posting list maps 'inverted' to documents 2 and 3" "{2,3}" "$postings"
+    assert_eq "Repeated term stores both positions in document 3" "{3,5}" "$positions"
+    assert_eq "Intersecting postings implements an AND search" "{3}" "$intersection"
+
+    if echo "$plan" | grep -q "inverted_index_pkey"; then
+        echo "  PASS: Term lookup uses the inverted index primary key"
+        PASSED=$((PASSED+1))
+    else
+        echo "  FAIL: Term lookup does not use the inverted index primary key"
+        FAILED=$((FAILED+1))
+    fi
+
+    run_sql "DROP TABLE IF EXISTS inverted_index;"
+    run_sql "DROP TABLE IF EXISTS documents;"
+}
+
 # --- Teardown ---
 
 teardown() {
@@ -463,6 +535,7 @@ ALL_TESTS=(
     test_million_random_integers
     test_index_performance
     test_full_text_search
+    test_inverted_index
 )
 
 # --- Run All Tests ---
